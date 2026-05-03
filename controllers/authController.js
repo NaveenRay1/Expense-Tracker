@@ -36,7 +36,7 @@ const loginUser = async(req,res)=>{
 
         if(!user)return res.status(404).json({msg:'email or password is incorrect'});
         // if found compare password
-        const check = await bcrypt.compare(password,user.passowrd);
+        const check = await bcrypt.compare(password,user.password);
         if(!check)return res.status(404).json({msg:'email or password is incorrect'});
 
         const token = jwt.sign(

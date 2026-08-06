@@ -1,15 +1,20 @@
 const express = require('express');
 require('dotenv').config();
 const User = require('./models/User')
+const Order = require('./models/Order');
+const Expense = require('./models/Expense');
 const sequelize = require('./config/db')
 const authRoutes = require('./routes/authRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
+const purchaseRoutes = require('./routes/purchaseRoutes');
+
 const app = express();
 app.use(express.json());
 
 
 app.use('/auth',authRoutes);
 app.use('/expense',expenseRoutes);
+app.use('/purchase',purchaseRoutes);
 const startSever = async() =>{
     try{
         await sequelize.sync({alter:true})

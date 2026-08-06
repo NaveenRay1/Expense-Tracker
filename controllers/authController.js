@@ -33,7 +33,7 @@ const loginUser = async(req,res)=>{
         if(!email || !password)return res.status(400).json({msg:'email and pass cant be empty'})
             
         const user = await User.findOne({where:{email:email}});
-
+        
         if(!user)return res.status(404).json({msg:'email or password is incorrect'});
         // if found compare password
         const check = await bcrypt.compare(password,user.password);

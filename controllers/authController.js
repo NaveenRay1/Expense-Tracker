@@ -55,4 +55,27 @@ const loginUser = async(req,res)=>{
     }
 }
 
-module.exports = {registerUser,loginUser};
+//change password 
+const changePassword = async (req,res)=>{
+     try{
+        const userId = req.user.id;
+        const user = await User.findOne({where:{id:userId}});
+        if(!user)return res.status(404).json({message:'user not found'});
+        //got current pass and new pass
+        const {currentPassword,newPassword} = req.body;
+        
+        const check = await bcrypt.compare(currentPassword,user.password);
+        if(!check)return res.status(404).json({message:"credentials are wrong"});
+        //if correct just change it
+         const newPasswordHash  = await bcrypt.hash(newPassword,10);
+          user.password = newPasswordHash;
+         await user.save();
+         return res.status(200).json({message:"password changed successfully"});
+
+     }
+     catch(err){
+         console.log(err.message);
+         return res.status(500).json({message:err.message});
+     }
+}
+module.exports = {registerUser,loginUser,changePassword};

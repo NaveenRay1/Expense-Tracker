@@ -2,7 +2,8 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sequelize = require('sequelize');
-
+const PasswordReset = require('../models/PasswordReset');
+const crypto = require('crypto');
 const registerUser = async(req,res)=>{
     try{
         const {UserName,email,password} = req.body;
@@ -78,4 +79,73 @@ const changePassword = async (req,res)=>{
          return res.status(500).json({message:err.message});
      }
 }
-module.exports = {registerUser,loginUser,changePassword};
+
+const forgotPassword = async(req,res)=>{
+    try{
+     const {email} = req.body;
+        if(!email)return res.status(400).json({message:"email is required"});
+
+        const user = await User.findOne({where:{email}});
+
+        if(!user)return res.status(404).json({message:"User not found"});
+
+        //generate token
+        const token = crypto.randomBytes(32).toString('hex');
+        //toke expire in 15min
+        const expiresAt = new Date(Date.now()+15*60*1000);
+
+        //now save in model
+        await PasswordReset.create({
+            token,
+            expiresAt,
+            userId:user.id,
+            isUsed:false
+        });
+        //will send email later
+
+        return res.status(201).json({message:"created token",token});
+
+
+    }
+    catch(err){
+        console.log(err.message);
+        return res.status(500).json({message:err.message});
+    }
+
+
+}
+
+const resetPassword = async(req,res)=>{
+
+    try{
+        const {newPassword} = req.body;
+        const {token} = req.query;
+
+        if(!newPassword)return res.status(400).json({message:"password can't be empty"});
+
+        //now validate
+
+        const forgotPass = await PasswordReset.findOne({where:{token}});
+        if(!forgotPass)return res.status(404).json({message:'invalid token'});
+        //find it let's validate
+        if(forgotPass.isUsed===false && forgotPass.expiresAt>=new Date(Date.now())){
+            //now we will change only
+
+            const hashPass =await bcrypt.hash(newPassword,10);
+            const user = await User.findOne({where:{id:forgotPass.userId}});
+            if(!user)return res.status(400).json({message:"user nor found"});
+
+            user.password = hashPass;
+            await user.save();
+            forgotPass.isUsed = true;
+            await forgotPass.save();
+            return res.status(200).json({message:"password resets successfully"});
+        }
+        else return res.status(500).json({message:"link expired create a new link"});
+    }
+    catch(err){
+        cosole.log(err.message);
+        return res.status(500).json({message:err.message});
+    }
+}
+module.exports = {registerUser,loginUser,changePassword,forgotPassword,resetPassword};

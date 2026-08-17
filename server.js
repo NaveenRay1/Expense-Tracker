@@ -3,6 +3,7 @@ require('dotenv').config();
 const User = require('./models/User')
 const Order = require('./models/Order');
 const Expense = require('./models/Expense');
+const PasswordReset = require('./models/PasswordReset');
 const sequelize = require('./config/db')
 const authRoutes = require('./routes/authRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');

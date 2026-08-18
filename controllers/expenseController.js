@@ -38,13 +38,92 @@ const addExpense = async (req, res) => {
 const getAllExpense = async (req, res) => {
   try {
     const { id } = req.user;
-    // now gotta find them all
-    const users =await Expense.findAll({ where: { userId: id } });
-    // gott all of them
-    console.log(users);
-    return res
-      .status(200)
-      .json({ msg: "got all expenses of user", data: users });
+   //now gotta do pagination
+   const page =  parseInt(req.query.page) || 1;
+   const limit = parseInt(req.query.limit) || 10;
+   
+    const offset = (page-1)*10;
+
+    const where = {
+      userId:id
+    };
+
+    // type filtering
+    const {type} = req.query;
+    
+    if(type){
+      where.type = type;
+    }
+
+    //filtering by category
+
+    const {category} = req.query;
+
+    if(category){
+      where.category = category;
+    }
+
+    //filter by specific date
+
+    const {date} = req.query;
+
+    const starOfDay = new Date(`${date}T00:00:00`);
+    const endOfDay = new Date(`${date}T23:59:00`);
+
+    where.date ={
+      [Op.gte]:startOfDay,
+      [op.lte]:endOfDat
+    };
+
+    const {startDate,endDate} = req.query;
+
+    if(startDate || endDate){
+      where.date = {};
+
+      if(startDate){
+        where.date[Op.gte] = new Date(`${startDate}T00:00:00`);
+      }
+
+      if(endDate){
+        where.date[Op.lte]= new Date(`${endDate}T23:59:00`);
+      }
+    }
+
+    //sorting
+    const sort = req.body.sort || "newest";
+    let order;
+
+    if(sort==="oldest"){
+      order = [["date","ASC"]];
+    }else{
+      order = [["date","DESC"]];
+    }
+
+    //FETCH TRANSACTION
+
+    const result = await Expense.findAndCountAll({
+      where:where,
+      limit:limit,
+      offset:offset,
+      order:order
+    });
+
+    const totalItems = result.count;
+    const totalPages = Math.ceil(totalItems/limit);
+
+    return res.status(200).json({
+      msg: "Transactions fetched successfully",
+
+      data: result.rows,
+
+      pagination: {
+        currentPage: page,
+        limit: limit,
+        totalItems: totalItems,
+        totalPages: totalPages
+      }
+    });
+
   } catch (err) {
     console.log(err);
     return res.status(500).json({ err: err });

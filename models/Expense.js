@@ -23,10 +23,15 @@ const Expense = sequelize.define('Expense',{
     type: {
     type: DataTypes.ENUM('expense', 'income'),
     allowNull: false
-}
+},
+    date: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        allowNull: false
+    }
 
 
-})
+});
 
 // define associations here
 User.hasMany(Expense,{foreignKey:'userId'})

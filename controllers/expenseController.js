@@ -255,7 +255,7 @@ const getTransactionSummary = async(req,res)=>{
     let totalIncome = 0;
     let totalExpense = 0;
     transactions.forEach((transaction)=>{
-      const amount = NUMBER(transaction.amount);
+      const amount = Number(transaction.amount);
       if(transaction.type==="expense")totalExpense+=amount;
       else if(transaction.type==="income")totalIncome+=amount;
     });
@@ -275,4 +275,128 @@ const getTransactionSummary = async(req,res)=>{
     return res.status(500).json({msg:err.message});
   }
 }
-module.exports = { addExpense ,updateExpense,getAllExpense,deleteExpense,getTransactionSummary};
+
+const getDayWiseSummary = async(req,res)=>{
+  try{
+  const {id} = req.user.id;
+  const {date} = req.query;
+
+  if(!date){
+    return res.status(400).json({msg:"date is required"});
+  }
+
+  const startOfDay = new Date(`${date}T00:00:00`);
+  const endOfDay = new Date(`${date}T23:59:59`);
+
+  const transaction = await Expense.findAll({
+    where:{
+      userId:id,
+      date:{
+        [Op.gte]:startOfDay,
+        [Op.lte]:endOfDay,
+      }
+    }
+  });
+  let dayIncome = 0;
+  let dayExpense = 0;
+  transaction.forEach((t)=>{
+    const amount = Number(t.amount);
+    if(t.type==="income")dayIncome+=amount;
+    else if(t.type==="expense")dayExpense+=amount;
+  });
+  const dayBalance = dayIncome-dayExpense;
+
+  const allTransactions = await Expense.findAll({
+    where:{
+      userId:id,
+      date:{[Op.lte]:endOfDay}
+    }
+  });
+  let totalIncome=0;
+  let totalExpense =0;
+  allTransactions.forEach((transaction)=>{
+    const amount = Number(transaction.amount);
+    if(transaction.type==="income")totalIncome+=amount;
+    else if(transaction.type==="expense")totalExpense+=amount;
+  });
+  const totalBalance = totalIncome-totalExpense;
+  return res.status(200).json({
+    msg:"fetched successfully",
+    data:{
+      dayExpense,
+      dayIncome,
+      dayBalance,
+      totalBalance
+    }
+  });
+}
+catch(err){
+  console.log(err.message);
+  return res.status(500).json({
+    msg:err.message
+  })
+}
+}
+const getReport = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        msg: "startDate and endDate are required"
+      });
+    }
+
+    const start = new Date(`${startDate}T00:00:00`);
+    const end = new Date(`${endDate}T23:59:59`);
+
+    // Get transactions within the selected date range
+    const transactions = await Expense.findAll({
+      where: {
+        userId: id,
+        date: {
+          [Op.gte]: start,
+          [Op.lte]: end
+        }
+      },
+      order: [["date", "ASC"]]
+    });
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    transactions.forEach((transaction) => {
+      const amount = Number(transaction.amount);
+
+      if (transaction.type === "income") {
+        totalIncome += amount;
+      } else if (transaction.type === "expense") {
+        totalExpense += amount;
+      }
+    });
+
+    const balance = totalIncome - totalExpense;
+
+    return res.status(200).json({
+      msg: "Report generated successfully",
+
+      data: {
+        startDate,
+        endDate,
+        totalIncome,
+        totalExpense,
+        balance,
+        transactions
+      }
+    });
+
+  } catch (err) {
+    console.log(err.message);
+
+    return res.status(500).json({
+      msg: err.message
+    });
+  }
+};
+module.exports = { addExpense ,updateExpense,getAllExpense,deleteExpense,getTransactionSummary,getDayWiseSummary,getReport};

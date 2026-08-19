@@ -225,12 +225,12 @@ const deleteExpense = async(req,res)=>{
         const expense = await Expense.findOne({where:{id:expenseId,userId:req.user.id},transaction:t});
         if(!expense){
             await t.rollback();
-            return res.status(404).json({msg:'user not found'});
+            return res.status(404).json({msg:'expense not found'});
         }
         
         // now update total expense
         const amount = expense.amount;
-        const deleteExp = await Expense.destroy({where:{id:expenseId},transaction:t});
+        const deleteExp = await Expense.destroy({where:{id:expenseId,userId:req.user.id},transaction:t});
      if(expense.type==='expense') await  User.increment('totalExpense',{by:-amount,where:{id:req.user.id},transaction:t});
       await t.commit();
         console.log('deleted',deleteExp);
@@ -242,4 +242,37 @@ const deleteExpense = async(req,res)=>{
         return res.status(500).json({err:err});
     }
 }
-module.exports = { addExpense ,updateExpense,getAllExpense,deleteExpense};
+const getTransactionSummary = async(req,res)=>{
+  try{
+    const {id} = req.user;
+    const transactions = await Expense.findAll({
+      where:{
+        userId:id
+      }
+    });
+
+    //now traverse and find all
+    let totalIncome = 0;
+    let totalExpense = 0;
+    transactions.forEach((transaction)=>{
+      const amount = NUMBER(transaction.amount);
+      if(transaction.type==="expense")totalExpense+=amount;
+      else if(transaction.type==="income")totalIncome+=amount;
+    });
+
+    const balance = totalIncome-totalExpense;
+    return res.status(200).json({
+      msg:"fetch successfully",
+      data:{
+        totalIncome:totalIncome,
+        totalExpense:totalExpense,
+        balance:balance
+      }
+    });
+  }
+  catch(err){
+    console.log(err.message);
+    return res.status(500).json({msg:err.message});
+  }
+}
+module.exports = { addExpense ,updateExpense,getAllExpense,deleteExpense,getTransactionSummary};

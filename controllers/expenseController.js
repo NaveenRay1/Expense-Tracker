@@ -1,6 +1,7 @@
 const sequelize = require("../config/db");
 const Expense = require("../models/Expense");
 const User = require('../models/User');
+const {Op} = require('sequelize');
 const addExpense = async (req, res) => {
         const t = await sequelize.transaction();
 
@@ -72,7 +73,7 @@ const getAllExpense = async (req, res) => {
 
     where.date ={
       [Op.gte]:startOfDay,
-      [op.lte]:endOfDat
+      [Op.lte]:endOfDat
     };
 
     const {startDate,endDate} = req.query;
@@ -133,34 +134,86 @@ const getAllExpense = async (req, res) => {
 const updateExpense = async(req,res)=>{
     const t = await sequelize.transaction();
     try{
-        // we gotta update so we will got the data and update that for that we need that expense id
-        const expenseId = req.params.id;
-        const {amount,description,category,type} = req.body;
-        
-        // now update
+      const expenseId = req.params.id;
+      //now get the data
+      const {
+        amount,
+        description,
+        category,
+        type
+      } = req.body;
 
-        const user = await Expense.findOne({where:{id:expenseId,userId:req.user.id},transaction:t});
-        if(!user){
-            await t.rollback();
-            return res.status(404).json({msg:'expense not found'});
-        }
-        const oldAmount = user.amount;
-        await user.update({amount,description,category,type},{transaction:t});
-        if(oldAmount>amount){
-            const val=oldAmount-amount;
-           await User.increment('totalExpense',{by:-val , where:{id:req.user.id},transaction:t});
-        }else{
-            const val = amount-oldAmount;
-           await User.increment('totalExpense',{by:val,where:{id:req.user.id},transaction:t});
-        }
-        await t.commit();
-        return res.status(200).json({msg:'updated successfully'});
-    }
-    catch (err) {
+      const expense = await Expense.findOne({
+        where:{
+          id:expenseId,
+          userId:req.user.id
+        },
+        
+          transaction:t
+        
+      });
+      
+      if(!expense){
         await t.rollback();
-    console.log(err);
-    return res.status(500).json({ err: err });
-  }
+        return res.status(404).json({msg:"expense not found"});
+      }
+      //if expense found
+      const oldAmount = expense.amount;
+      const oldType = expense.type;
+
+      //update
+      await expense.update({
+        amount,
+        description,
+        category,
+        type
+      },
+    {
+      transaction:t
+    }
+    );
+    const newAmount = amount;
+      //case 1 if old and new both r expense
+      if(type === "expense" && oldType === "expense"){
+        const diff = newAmount-oldAmount;
+        await User.increment("totalExpense",{
+          by:diff,
+          where:{
+            id:req.user.id
+          },
+          transaction:t
+        });
+
+      }
+      //case 2 if old is expense new is income
+      if(type==="income" && oldType==="expense"){
+        await User.increment("totalExpense",{
+          by:-oldAmount,
+          where:{
+            id:req.user.id
+          },
+          transaction:t
+        })
+      }
+      //case 3 old was income new one is expense
+      if(type==="expense" && oldType==="income"){
+        await User.increment("totalExpense",{
+          by:newAmount,
+          where:{
+            id:req.user.id
+          },
+          transaction:t
+        })
+      }
+      //done
+      await t.commit();
+      return res.status(200).json({msg:"updated successfully"});
+    }
+    catch(err){
+     await t.rollback();
+      console.log(err.message);
+      return res.status(500).json({msg:err.message});
+    }
 }
 
 const deleteExpense = async(req,res)=>{

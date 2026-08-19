@@ -8,11 +8,11 @@ const sequelize = require('./config/db')
 const authRoutes = require('./routes/authRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const purchaseRoutes = require('./routes/purchaseRoutes');
-
+const userRoutes = require("./routes/userRoutes");
 const app = express();
 app.use(express.json());
 
-
+app.use("/user", userRoutes);
 app.use('/auth',authRoutes);
 app.use('/expense',expenseRoutes);
 app.use('/purchase',purchaseRoutes);

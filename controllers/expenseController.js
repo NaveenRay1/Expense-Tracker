@@ -351,7 +351,7 @@ const getReport = async (req, res) => {
     const start = new Date(`${startDate}T00:00:00`);
     const end = new Date(`${endDate}T23:59:59`);
 
-    // Get transactions within the selected date range
+    // Get transactions in the selected date range
     const transactions = await Expense.findAll({
       where: {
         userId: id,
@@ -366,13 +366,30 @@ const getReport = async (req, res) => {
     let totalIncome = 0;
     let totalExpense = 0;
 
+    // Object to store category-wise expenses
+    const categoryWiseExpense = {};
+
     transactions.forEach((transaction) => {
       const amount = Number(transaction.amount);
 
+      // Calculate income
       if (transaction.type === "income") {
         totalIncome += amount;
-      } else if (transaction.type === "expense") {
+      }
+
+      // Calculate expenses
+      else if (transaction.type === "expense") {
         totalExpense += amount;
+
+        const category = transaction.category;
+
+        // If category doesn't exist yet
+        if (!categoryWiseExpense[category]) {
+          categoryWiseExpense[category] = 0;
+        }
+
+        // Add amount to category
+        categoryWiseExpense[category] += amount;
       }
     });
 
@@ -384,9 +401,13 @@ const getReport = async (req, res) => {
       data: {
         startDate,
         endDate,
+
         totalIncome,
         totalExpense,
         balance,
+
+        categoryWiseExpense,
+
         transactions
       }
     });

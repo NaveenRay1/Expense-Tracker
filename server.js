@@ -1,5 +1,7 @@
 const express = require('express');
 require('dotenv').config();
+const cookieParser = require('cookie-parser');
+
 const User = require('./models/User')
 const Order = require('./models/Order');
 const Expense = require('./models/Expense');
@@ -11,6 +13,8 @@ const purchaseRoutes = require('./routes/purchaseRoutes');
 const userRoutes = require("./routes/userRoutes");
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
+
 
 app.use("/user", userRoutes);
 app.use('/auth',authRoutes);

@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const authenticate = async(req,res,next)=>{
 
     try{
-       const token = req.headers.authorization?.split(' ')[1] || req.headers.authorization;
+       const token = req.cookies.token;
         if(!token) return res.status(401).json({msg:'acess denied please login'});
         // if token found decode it
         const decoded = jwt.verify(token,process.env.JWT_SECRET);

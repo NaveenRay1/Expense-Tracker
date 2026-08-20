@@ -35,19 +35,26 @@ const loginUser = async(req,res)=>{
             
         const user = await User.findOne({where:{email:email}});
         
-        if(!user)return res.status(404).json({msg:'email or password is incorrect'});
+        if(!user)return res.status(401).json({msg:'email or password is incorrect'});
         // if found compare password
         const check = await bcrypt.compare(password,user.password);
-        if(!check)return res.status(404).json({msg:'email or password is incorrect'});
+        if(!check)return res.status(401).json({msg:'email or password is incorrect'});
 
         const token = jwt.sign(
             { id: user.id, email: user.email },  // payload
             process.env.JWT_SECRET,               // secret key from .env
-            { expiresIn: '1h' }                   // token expires in 1 hour
+            { expiresIn: '7d' }                   // token expires in 7d hour
         );
 
-    return res.status(200).json({ message: 'successfully logged in', token: token });
-        console.log('sucess');
+        //put in cookies 
+        res.cookie("token",token,{
+            httpOnly:true,
+            secure:false,
+            sameSite:"lax",
+            maxAge:7*24*60*60*1000
+        })
+    return res.status(200).json({ message: 'successfully logged in' });
+
         
     }
     catch(err) {
@@ -148,4 +155,24 @@ const resetPassword = async(req,res)=>{
         return res.status(500).json({message:err.message});
     }
 }
-module.exports = {registerUser,loginUser,changePassword,forgotPassword,resetPassword};
+const logoutUser = async(req,res)=>{
+    try{
+        res.clearCookie("token",{
+            httpOnly:true,
+            secure:false,
+            sameSite:"lax"
+        });
+         return res.status(200).json({
+      message: "successfully logged out"
+    });
+    }
+    catch (err) {
+
+    console.log(err.message);
+
+    return res.status(500).json({
+      message: err.message
+    });
+  }
+}
+module.exports = {registerUser,loginUser,changePassword,forgotPassword,resetPassword,logoutUser};

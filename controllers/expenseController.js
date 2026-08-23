@@ -68,12 +68,12 @@ const getAllExpense = async (req, res) => {
 
     const {date} = req.query;
 
-    const starOfDay = new Date(`${date}T00:00:00`);
+    const startOfDay = new Date(`${date}T00:00:00`);
     const endOfDay = new Date(`${date}T23:59:00`);
 
     where.date ={
       [Op.gte]:startOfDay,
-      [Op.lte]:endOfDat
+      [Op.lte]:endOfDay
     };
 
     const {startDate,endDate} = req.query;

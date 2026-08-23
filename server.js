@@ -1,7 +1,7 @@
 const express = require('express');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
-
+const path = require('path')
 const User = require('./models/User')
 const Order = require('./models/Order');
 const Expense = require('./models/Expense');
@@ -12,10 +12,15 @@ const expenseRoutes = require('./routes/expenseRoutes');
 const purchaseRoutes = require('./routes/purchaseRoutes');
 const userRoutes = require("./routes/userRoutes");
 const app = express();
+app.set("view engine","ejs");
+app.use(express.urlencoded({ extended: true }));
+app.set("views",path.join(__dirname,"views"));
 app.use(express.json());
 app.use(cookieParser());
 
-
+app.get('/login',(req,res)=>{
+    res.render("login");
+})
 app.use("/user", userRoutes);
 app.use('/auth',authRoutes);
 app.use('/expense',expenseRoutes);

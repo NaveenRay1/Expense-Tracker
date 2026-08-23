@@ -6,7 +6,7 @@ const PasswordReset = require('../models/PasswordReset');
 const crypto = require('crypto');
 const registerUser = async(req,res)=>{
     try{
-        const {UserName,email,password} = req.body;
+        const {userName,email,password} = req.body;
         // now we can check them in database specially email if email exist then can't create
         const user = await User.findOne({where:{email:email}});
         if(user){
@@ -17,9 +17,10 @@ const registerUser = async(req,res)=>{
         // else we will create a user
         // firstly hash the pass
         const hashPass =await bcrypt.hash(password,10);
-       const data= await User.create({UserName,email,password:hashPass});
+       const data= await User.create({UserName:userName,email,password:hashPass});
         console.log('user created');
-        return res.status(201).json({message:'user created',data:data});
+
+        return res.redirect('/login');
     }
     catch(err){
         console.log(err);
@@ -53,6 +54,7 @@ const loginUser = async(req,res)=>{
             sameSite:"lax",
             maxAge:7*24*60*60*1000
         })
+        res.render("login");
     return res.status(200).json({ message: 'successfully logged in' });
 
         

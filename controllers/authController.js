@@ -17,7 +17,7 @@ const registerUser = async(req,res)=>{
         // else we will create a user
         // firstly hash the pass
         const hashPass =await bcrypt.hash(password,10);
-       const data= await User.create({UserName:userName,email,password:hashPass});
+       const data= await User.create({userName,email,password:hashPass});
         console.log('user created');
 
         return res.redirect('/login');
@@ -54,8 +54,8 @@ const loginUser = async(req,res)=>{
             sameSite:"lax",
             maxAge:7*24*60*60*1000
         })
-        res.render("login");
-    return res.status(200).json({ message: 'successfully logged in' });
+        res.redirect("/");
+    // return res.status(200).json({ message: 'successfully logged in' });
 
         
     }

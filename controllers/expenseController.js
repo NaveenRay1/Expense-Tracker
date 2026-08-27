@@ -278,7 +278,7 @@ const getTransactionSummary = async(req,res)=>{
 
 const getDayWiseSummary = async(req,res)=>{
   try{
-  const {id} = req.user.id;
+  const {id} = req.user;
   const {date} = req.query;
 
   if(!date){

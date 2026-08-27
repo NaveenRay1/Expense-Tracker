@@ -13,7 +13,7 @@ const purchaseRoutes = require('./routes/purchaseRoutes');
 const userRoutes = require("./routes/userRoutes");
 const authMiddleware = require('./middlewares/authMiddleware');
 const { renderDashboard, addExpenseForm } = require('./controllers/expenseController');
-
+const { isPremium } = require('./middlewares/premiumMiddleware');
 const app = express();
 app.set("view engine","ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -25,6 +25,10 @@ app.post("/add", authMiddleware, addExpenseForm);
 app.get('/login',(req,res)=>{
     res.render("login");
 })
+app.get('/dayWise', authMiddleware, isPremium, async (req, res) => {
+    const user = await User.findOne({ where: { id: req.user.id } });
+    res.render('daywise', { user });
+});
 app.use("/user", userRoutes);
 app.use('/auth',authRoutes);
 app.use('/expense',expenseRoutes);

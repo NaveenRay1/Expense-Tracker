@@ -276,67 +276,55 @@ const getTransactionSummary = async(req,res)=>{
   }
 }
 
-const getDayWiseSummary = async(req,res)=>{
-  try{
-  const {id} = req.user;
-  const {date} = req.query;
+const getDayWiseSummary = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const { date } = req.query;
 
-  if(!date){
-    return res.status(400).json({msg:"date is required"});
+    if (!date) {
+      return res.status(400).json({ msg: "date is required" });
+    }
+
+    const startOfDay = new Date(`${date}T00:00:00`);
+    const endOfDay = new Date(`${date}T23:59:59`);
+
+    const dayTransactions = await Expense.findAll({
+      where: {
+        userId: id,
+        date: { [Op.gte]: startOfDay, [Op.lte]: endOfDay }
+      },
+      order: [["date", "DESC"]]
+    });
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+    dayTransactions.forEach((t) => {
+      const amount = Number(t.amount);
+      if (t.type === "income") totalIncome += amount;
+      else if (t.type === "expense") totalExpense += amount;
+    });
+
+    const transactions = dayTransactions.map((t) => ({
+      title: t.description,
+      category: t.category,
+      amount: t.amount,
+      date: t.date,
+      type: t.type
+    }));
+
+    return res.status(200).json({
+      msg: "fetched successfully",
+      totalIncome,
+      totalExpense,
+      netAmount: totalIncome - totalExpense,
+      transLength: dayTransactions.length,
+      transactions
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ msg: err.message });
   }
-
-  const startOfDay = new Date(`${date}T00:00:00`);
-  const endOfDay = new Date(`${date}T23:59:59`);
-
-  const transaction = await Expense.findAll({
-    where:{
-      userId:id,
-      date:{
-        [Op.gte]:startOfDay,
-        [Op.lte]:endOfDay,
-      }
-    }
-  });
-  let dayIncome = 0;
-  let dayExpense = 0;
-  transaction.forEach((t)=>{
-    const amount = Number(t.amount);
-    if(t.type==="income")dayIncome+=amount;
-    else if(t.type==="expense")dayExpense+=amount;
-  });
-  const dayBalance = dayIncome-dayExpense;
-
-  const allTransactions = await Expense.findAll({
-    where:{
-      userId:id,
-      date:{[Op.lte]:endOfDay}
-    }
-  });
-  let totalIncome=0;
-  let totalExpense =0;
-  allTransactions.forEach((transaction)=>{
-    const amount = Number(transaction.amount);
-    if(transaction.type==="income")totalIncome+=amount;
-    else if(transaction.type==="expense")totalExpense+=amount;
-  });
-  const totalBalance = totalIncome-totalExpense;
-  return res.status(200).json({
-    msg:"fetched successfully",
-    data:{
-      dayExpense,
-      dayIncome,
-      dayBalance,
-      totalBalance
-    }
-  });
-}
-catch(err){
-  console.log(err.message);
-  return res.status(500).json({
-    msg:err.message
-  })
-}
-}
+};
 const getReport = async (req, res) => {
   try {
     const { id } = req.user;

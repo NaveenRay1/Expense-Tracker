@@ -63,70 +63,40 @@ const getPaymentStatus = async (req, res) => {
   try {
     const { order_id } = req.query;
 
-    console.log(order_id);
-    //got order id now got let's got response which contain payments
     const response = await cashfree.PGOrderFetchPayments(order_id);
-    console.log(response.data);
-
-    //got response
     const payments = response.data;
 
     let status;
-    if (payments.some((payment) => payment.payment_status === "SUCCESS"))
-      status = "SUCCESS";
-    else if (payments.some((payment) => payment.payment_status === "PENDING"))
-      status = "PENDING";
+    if (payments.some((payment) => payment.payment_status === "SUCCESS")) status = "SUCCESS";
+    else if (payments.some((payment) => payment.payment_status === "PENDING")) status = "PENDING";
     else status = "FAILED";
 
-    console.log("Payment status:", status);
-
-    //now update order
-    const orderUpdate = await Order.findOne({
-      where: { orderId: order_id },
-    });
-
+    const orderUpdate = await Order.findOne({ where: { orderId: order_id } });
     if (!orderUpdate) {
-      return res.status(404).json({
-        message: "order not found",
-      });
+      return res.status(404).send("Order not found");
     }
 
     orderUpdate.status = status;
     await orderUpdate.save();
 
     if (status === "SUCCESS") {
-      const user = await User.findOne({
-        where: { id: req.user.id },
-      });
-
-      if (!user) {
-        return res.status(404).json({
-          message: "user not found",
-        });
-      }
+      const user = await User.findOne({ where: { id: req.user.id } });
+      if (!user) return res.status(404).send("User not found");
 
       user.isPremium = true;
       await user.save();
-    }
 
-    if (status === "SUCCESS") {
-      return res.status(200).json({
-        message: "Payment successful, premium purchased",
-      });
+      return res.redirect("/");   // ✅ go straight to dashboard, freshly re-rendered with isPremium: true
     }
 
     if (status === "PENDING") {
-      return res.status(200).json({
-        message: "Payment is still pending",
-      });
+      return res.redirect("/?payment=pending");
     }
 
-    return res.status(200).json({
-      message: "Payment failed",
-    });
+    return res.redirect("/?payment=failed");
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({ err: err.message });
+    return res.status(500).send("Something went wrong verifying payment");
   }
 };
 

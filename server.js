@@ -12,33 +12,16 @@ const expenseRoutes = require('./routes/expenseRoutes');
 const purchaseRoutes = require('./routes/purchaseRoutes');
 const userRoutes = require("./routes/userRoutes");
 const authMiddleware = require('./middlewares/authMiddleware');
+const { renderDashboard, addExpenseForm } = require('./controllers/expenseController');
+
 const app = express();
 app.set("view engine","ejs");
 app.use(express.urlencoded({ extended: true }));
 app.set("views",path.join(__dirname,"views"));
 app.use(express.json());
 app.use(cookieParser());
-app.get("/", authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findOne({
-      where: {
-        id: req.user.id
-      }
-    });
-
-    if (!user) {
-      return res.redirect("/login");
-    }
-
-    res.render("home", {
-      user
-    });
-
-  } catch (err) {
-    console.log(err.message);
-    res.status(500).send("Server error");
-  }
-});
+app.get("/", authMiddleware, renderDashboard);
+app.post("/add", authMiddleware, addExpenseForm);
 app.get('/login',(req,res)=>{
     res.render("login");
 })
@@ -48,7 +31,7 @@ app.use('/expense',expenseRoutes);
 app.use('/purchase',purchaseRoutes);
 const startSever = async() =>{
     try{
-        await sequelize.sync({force:true})
+        await sequelize.sync({alter:true})
         .then(()=>console.log('databse connected'))
         app.listen(process.env.PORT,()=>{
             console.log('server is running at port',process.env.PORT);

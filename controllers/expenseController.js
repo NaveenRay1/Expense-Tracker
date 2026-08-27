@@ -420,4 +420,99 @@ const getReport = async (req, res) => {
     });
   }
 };
-module.exports = { addExpense ,updateExpense,getAllExpense,deleteExpense,getTransactionSummary,getDayWiseSummary,getReport};
+const renderDashboard = async (req, res) => {
+  try {
+    const { id } = req.user;
+
+    const user = await User.findOne({ where: { id } });
+    if (!user) return res.redirect("/login");
+
+    const allTransactions = await Expense.findAll({
+      where: { userId: id },
+      order: [["date", "DESC"]]
+    });
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+    allTransactions.forEach((t) => {
+      const amt = Number(t.amount);
+      if (t.type === "income") totalIncome += amt;
+      else if (t.type === "expense") totalExpense += amt;
+    });
+
+    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const now = new Date();
+    const monthTotals = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const month = d.getMonth();
+      const year = d.getFullYear();
+      const sum = allTransactions
+        .filter((t) => {
+          const td = new Date(t.date);
+          return t.type === "expense" && td.getMonth() === month && td.getFullYear() === year;
+        })
+        .reduce((acc, t) => acc + Number(t.amount), 0);
+      monthTotals.push({ month: monthNames[month], total: sum });
+    }
+
+    const maxTotal = Math.max(...monthTotals.map((m) => m.total), 1);
+    const completeHeights = monthTotals.map((m) => ({
+      month: m.month,
+      height: Math.round((m.total / maxTotal) * 100)
+    }));
+
+    const transactions = allTransactions.slice(0, 5).map((t) => ({
+      title: t.description,
+      date: new Date(t.date).toLocaleDateString(),
+      amount: t.amount,
+      type: t.type
+    }));
+
+    return res.render("home", {
+      user,          
+      totalIncome,
+      totalExpense,
+      completeHeights,
+      transactions
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).send("Something went wrong loading the dashboard");
+  }
+};
+
+const addExpenseForm = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const { amount, title, category, type, desc } = req.body;
+
+    if (!amount || !title || !category || !type) {
+      await t.rollback();
+      return res.status(400).send("Please fill all required fields");
+    }
+
+    const { id } = req.user;
+await Expense.create(
+      {
+        amount,
+        description: title,   // form's "title" maps to your model's "description"
+        category,
+        type,
+        userId: id
+      },
+      { transaction: t }
+    );
+
+    if (type === "expense") {
+      await User.increment("totalExpense", { by: amount, where: { id }, transaction: t });
+    }
+ await t.commit();
+    return res.redirect("/");
+  } catch (err) {
+    await t.rollback();
+    console.log(err.message);
+    return res.status(500).send("Something went wrong creating the transaction");
+  }
+};
+module.exports = { addExpense ,updateExpense,getAllExpense,deleteExpense,getTransactionSummary,getDayWiseSummary,getReport,renderDashboard,addExpenseForm,};

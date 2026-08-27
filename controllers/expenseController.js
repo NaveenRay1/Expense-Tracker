@@ -503,4 +503,72 @@ await Expense.create(
     return res.status(500).send("Something went wrong creating the transaction");
   }
 };
-module.exports = { addExpense ,updateExpense,getAllExpense,deleteExpense,getTransactionSummary,getDayWiseSummary,getReport,renderDashboard,addExpenseForm,};
+const filterExpenses = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const { filters = {}, page = [1, 10] } = req.body;
+
+    const pageNumber = Number(page[0]) || 1;
+    const limit = Number(page[1]) || 10;
+    const offset = (pageNumber - 1) * limit;
+
+    const where = { userId: id };
+
+    if (filters.transactionType && filters.transactionType !== "all") {
+      where.type = filters.transactionType;
+    }
+
+    if (filters.category && filters.category !== "all") {
+      where.category = filters.category;
+    }
+
+    if (filters.amountRange && filters.amountRange !== "any") {
+      const [min, max] = filters.amountRange.split("_").map(Number);
+      where.amount = { [Op.gte]: min, [Op.lte]: max };
+    }
+
+    if (filters.dateRange && filters.dateRange !== "all") {
+      const now = new Date();
+      let start;
+      if (filters.dateRange === "today") {
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (filters.dateRange === "this_week") {
+        start = new Date(now);
+        start.setDate(now.getDate() - now.getDay());
+      } else if (filters.dateRange === "this_month") {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+      } else if (filters.dateRange === "this_year") {
+        start = new Date(now.getFullYear(), 0, 1);
+      }
+      if (start) {
+        where.date = { [Op.gte]: start };
+      }
+    }
+
+   const result = await Expense.findAndCountAll({
+      where,
+      limit,
+      offset,
+      order: [["date", "DESC"]]
+    });
+
+    const data = result.rows.map((t) => ({
+      id: t.id,
+      title: t.description,
+      desc: t.category,
+      category: t.category,
+      date: new Date(t.date).toLocaleDateString(),
+      amount: t.amount,
+      type: t.type
+    }));
+
+    return res.status(200).json({
+      data,
+      count: result.count
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ msg: err.message });
+  }
+};
+module.exports = { addExpense ,updateExpense,getAllExpense,deleteExpense,getTransactionSummary,getDayWiseSummary,getReport,renderDashboard,addExpenseForm,filterExpenses};

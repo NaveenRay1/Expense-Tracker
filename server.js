@@ -29,6 +29,10 @@ app.get('/dayWise', authMiddleware, isPremium, async (req, res) => {
     const user = await User.findOne({ where: { id: req.user.id } });
     res.render('daywise', { user });
 });
+app.get('/transactions', authMiddleware, async (req, res) => {
+  const user = await User.findOne({ where: { id: req.user.id } });
+  res.render('transactions', { user, transactions: [] });
+});
 app.use("/user", userRoutes);
 app.use('/auth',authRoutes);
 app.use('/expense',expenseRoutes);

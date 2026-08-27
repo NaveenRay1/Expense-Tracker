@@ -588,7 +588,7 @@
                 <div class="chart-container">
                     <%completeHeights.forEach((val,ind)=>{%>
 
-                        <div class="bar" style="height:<%=val.height%>%">
+                        <div class="bar" style="height:<%= val.height || 0 %>%">
                             <div class="bar-label">
                                 <%=val.month%>
                             </div>

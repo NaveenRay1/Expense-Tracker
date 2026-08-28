@@ -30,7 +30,11 @@ const User = sequelize.define('User',{
     totalExpense:{
         type:DataTypes.FLOAT,
         defaultValue:0
-    }
+    },
+    totalIncome:{
+    type:DataTypes.FLOAT,
+    defaultValue:0
+}
 })
 
 module.exports = User;

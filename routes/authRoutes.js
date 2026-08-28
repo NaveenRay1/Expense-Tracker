@@ -8,5 +8,5 @@ router.post('/login',loginUser);
 router.post('/change-password',authenticate,changePassword);
 router.post('/forgot-password',forgotPassword);
 router.post('/reset-password', resetPassword);
-router.post('/logout',loginUser);
+router.post('/logout',logoutUser);
 module.exports = router;

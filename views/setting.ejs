@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Expense Tracker - Settings</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #3f37c9;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #4338ca;
+            --gray: #6c757d;
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f46e5',
+                        'primary-dark': '#4338ca',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b',
+                        info: '#3b82f6',
+                        'premium-gold': '#D4AF37',
+                        'premium-accent': '#3d5a80'
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Navbar -->
+    <div>
+        <%- include('partials/navbar', { user: user }) %>
+    </div>
+
+
+    <!-- Main Content -->
+    <main class="w-[80vw] mx-auto my-10">
+
+        <!-- Profile Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+
+            <!-- Profile Header -->
+            <div class="flex flex-col items-center mb-10">
+
+                <div class="relative mb-4">
+
+                    <div
+                        class="w-32 h-32 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
+
+                        <span class="text-white text-4xl font-bold">
+                            <%= user.userName.substring(0, 2).toUpperCase() %>
+                        </span>
+
+                    </div>
+
+                    <div
+                        class="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-2 border-white">
+                    </div>
+
+                </div>
+
+                <h2 class="text-2xl text-gray-800 font-bold">
+                    <%= user.userName %>
+                </h2>
+
+                <p class="text-gray-500 mt-1">
+                    <%= user.email %>
+                </p>
+
+                <% if (user.isPremium) { %>
+
+                    <p class="text-yellow-600 font-semibold mt-2">
+                        <i class="fas fa-crown mr-1"></i>
+                        Premium Member
+                    </p>
+
+                <% } else { %>
+
+                    <p class="text-gray-500 mt-2">
+                        Free Member
+                    </p>
+
+                <% } %>
+
+            </div>
+
+
+            <!-- Personal Information -->
+            <section class="mb-10">
+
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <i class="fas fa-user-circle text-primary mr-2"></i>
+                    Personal Information
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- Name -->
+                    <div>
+
+                        <label class="block text-gray-500 text-sm mb-2">
+                            Full Name
+                        </label>
+
+                        <div
+                            class="bg-gray-100 rounded-lg px-4 py-3 flex items-center">
+
+                            <i class="fas fa-user text-primary mr-3"></i>
+
+                            <span class="text-gray-800">
+                                <%= user.userName %>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Email -->
+                    <div>
+
+                        <label class="block text-gray-500 text-sm mb-2">
+                            Email Address
+                        </label>
+
+                        <div
+                            class="bg-gray-100 rounded-lg px-4 py-3 flex items-center">
+
+                            <i class="fas fa-envelope text-primary mr-3"></i>
+
+                            <span class="text-gray-800">
+                                <%= user.email %>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Profile Buttons -->
+                <div class="mt-6 flex flex-col md:flex-row gap-4">
+
+                    <button
+                        type="button"
+                        id="editProfileBtn"
+                        class="bg-primary hover:bg-primary-dark text-white px-4 py-3 rounded-lg transition flex-1">
+
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Profile
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="shareProfileBtn"
+                        class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg transition flex-1">
+
+                        <i class="fas fa-share-alt mr-2"></i>
+                        Share Profile
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- Financial Overview -->
+            <section>
+
+                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                    <i class="fas fa-chart-pie text-primary mr-2"></i>
+                    Financial Overview
+                </h3>
+
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    <!-- Total Expense -->
+                    <div
+                        class="bg-gradient-to-br from-indigo-600 to-indigo-900 rounded-xl p-5 text-center shadow-lg text-white">
+
+                        <div class="text-3xl font-bold mb-2">
+                            ₹<%= Number(user.totalExpense || 0).toLocaleString() %>
+                        </div>
+
+                        <div class="text-gray-200">
+                            Total Expense
+                        </div>
+
+                    </div>
+
+
+                    <!-- Total Income -->
+                    <div
+                        class="bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-xl p-5 text-center shadow-lg text-white">
+
+                        <div class="text-3xl font-bold mb-2">
+                            ₹<%= Number(user.totalIncome || 0).toLocaleString() %>
+                        </div>
+
+                        <div class="text-gray-200">
+                            Total Income
+                        </div>
+
+                    </div>
+
+
+                    <!-- Savings Rate -->
+                    <div
+                        class="bg-gradient-to-br from-green-600 to-green-800 rounded-xl p-5 text-center shadow-lg text-white">
+
+                        <%
+                            const income = Number(user.totalIncome || 0);
+                            const expense = Number(user.totalExpense || 0);
+
+                            let savingsRate = 0;
+
+                            if (income > 0) {
+                                savingsRate = ((income - expense) / income) * 100;
+                            }
+                        %>
+
+                        <div class="text-3xl font-bold mb-2">
+                            <%= savingsRate.toFixed(2) %>%
+                        </div>
+
+                        <div class="text-gray-200">
+                            Savings Rate
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+
+        <div class="container mx-auto px-4 py-8">
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+                <!-- About -->
+                <div>
+
+                    <h3 class="text-lg font-semibold mb-4">
+                        ExpenseTracker
+                    </h3>
+
+                    <p class="text-gray-400">
+                        Take control of your finances with our intuitive
+                        expense tracking app.
+                    </p>
+
+                </div>
+
+
+                <!-- Quick Links -->
+                <div>
+
+                    <h4 class="text-md font-semibold mb-4">
+                        Quick Links
+                    </h4>
+
+                    <ul class="space-y-2 text-gray-400">
+
+                        <li>
+                            <a href="/" class="hover:text-white transition">
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/transactions" class="hover:text-white transition">
+                                Transactions
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/dayWise" class="hover:text-white transition">
+                                Daily
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/reports" class="hover:text-white transition">
+                                Reports
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+
+                <!-- Resources -->
+                <div>
+
+                    <h4 class="text-md font-semibold mb-4">
+                        Resources
+                    </h4>
+
+                    <ul class="space-y-2 text-gray-400">
+
+                        <li>
+                            <a href="#" class="hover:text-white transition">
+                                Help Center
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#" class="hover:text-white transition">
+                                Financial Tips
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#" class="hover:text-white transition">
+                                Privacy Policy
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#" class="hover:text-white transition">
+                                Terms of Service
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+
+                <!-- App -->
+                <div>
+
+                    <h4 class="text-md font-semibold mb-4">
+                        Get the App
+                    </h4>
+
+                    <div class="flex flex-col space-y-2">
+
+                        <button
+                            type="button"
+                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center">
+
+                            <i class="fab fa-apple mr-2"></i>
+                            App Store
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center">
+
+                            <i class="fab fa-google-play mr-2"></i>
+                            Google Play
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+
+                <p>
+                    &copy; 2023 ExpenseTracker. All rights reserved.
+                </p>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- Small temporary JS -->
+    <script>
+
+        // Edit Profile
+        document.getElementById("editProfileBtn").addEventListener("click", () => {
+            alert("Edit Profile will be implemented next.");
+        });
+
+
+        // Share Profile
+        document.getElementById("shareProfileBtn").addEventListener("click", async () => {
+
+            if (navigator.share) {
+
+                try {
+
+                    await navigator.share({
+                        title: "ExpenseTracker Profile",
+                        text: "<%= user.userName %>'s ExpenseTracker profile"
+                    });
+
+                } catch (err) {
+
+                    console.log("Share cancelled");
+
+                }
+
+            } else {
+
+                alert("Sharing is not supported on this browser.");
+
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>

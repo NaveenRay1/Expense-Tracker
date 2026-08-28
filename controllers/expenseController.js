@@ -1,30 +1,43 @@
 const sequelize = require("../config/db");
 const Expense = require("../models/Expense");
-const User = require('../models/User');
-const {Op} = require('sequelize');
+const User = require("../models/User");
+const { Op } = require("sequelize");
 const addExpense = async (req, res) => {
-        const t = await sequelize.transaction();
+  const t = await sequelize.transaction();
 
-    try {
-
+  try {
     const { amount, description, category, type } = req.body;
-    if (!amount || !description || !category || !type){
-            await t.rollback();
-        return res.status(400).json({ msg: "fill all fields" });
+    if (!amount || !description || !category || !type) {
+      await t.rollback();
+      return res.status(400).json({ msg: "fill all fields" });
     }
-     
+
     // we also need to add user id right we will have that from middleware
 
     const { id } = req.user;
-    const user = await Expense.create({
-      amount,
-      description,
-      category,
-      type,
-      userId: id,
-    },{transaction:t});
+    const user = await Expense.create(
+      {
+        amount,
+        description,
+        category,
+        type,
+        userId: id,
+      },
+      { transaction: t },
+    );
     // add the amount in the totalExpense for the leaderboard
-   if(type==='expense') await User.increment('totalExpense',{by:amount,where:{id:id},transaction:t});
+    if (type === "expense")
+      await User.increment("totalExpense", {
+        by: amount,
+        where: { id: id },
+        transaction: t,
+      });
+    else if (type === "income")
+      await User.increment("totalIncome", {
+        by: amount,
+        where: { id: id },
+        transaction: t,
+      });
     // now done
     await t.commit();
     console.log(user);
@@ -39,54 +52,54 @@ const addExpense = async (req, res) => {
 const getAllExpense = async (req, res) => {
   try {
     const { id } = req.user;
-   //now gotta do pagination
-   const page =  parseInt(req.query.page) || 1;
-   const limit = parseInt(req.query.limit) || 10;
-   
-    const offset = (page-1)*10;
+    //now gotta do pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const offset = (page - 1) * 10;
 
     const where = {
-      userId:id
+      userId: id,
     };
 
     // type filtering
-    const {type} = req.query;
-    
-    if(type){
+    const { type } = req.query;
+
+    if (type) {
       where.type = type;
     }
 
     //filtering by category
 
-    const {category} = req.query;
+    const { category } = req.query;
 
-    if(category){
+    if (category) {
       where.category = category;
     }
 
     //filter by specific date
 
-    const {date} = req.query;
+    const { date } = req.query;
 
     const startOfDay = new Date(`${date}T00:00:00`);
     const endOfDay = new Date(`${date}T23:59:00`);
 
-    where.date ={
-      [Op.gte]:startOfDay,
-      [Op.lte]:endOfDay
+    where.date = {
+      [Op.gte]: startOfDay,
+      [Op.lte]: endOfDay,
     };
 
-    const {startDate,endDate} = req.query;
+    const { startDate, endDate } = req.query;
 
-    if(startDate || endDate){
+    if (startDate || endDate) {
       where.date = {};
 
-      if(startDate){
+      if (startDate) {
         where.date[Op.gte] = new Date(`${startDate}T00:00:00`);
       }
 
-      if(endDate){
-        where.date[Op.lte]= new Date(`${endDate}T23:59:00`);
+      if (endDate) {
+        where.date[Op.lte] = new Date(`${endDate}T23:59:00`);
       }
     }
 
@@ -94,23 +107,23 @@ const getAllExpense = async (req, res) => {
     const sort = req.body.sort || "newest";
     let order;
 
-    if(sort==="oldest"){
-      order = [["date","ASC"]];
-    }else{
-      order = [["date","DESC"]];
+    if (sort === "oldest") {
+      order = [["date", "ASC"]];
+    } else {
+      order = [["date", "DESC"]];
     }
 
     //FETCH TRANSACTION
 
     const result = await Expense.findAndCountAll({
-      where:where,
-      limit:limit,
-      offset:offset,
-      order:order
+      where: where,
+      limit: limit,
+      offset: offset,
+      order: order,
     });
 
     const totalItems = result.count;
-    const totalPages = Math.ceil(totalItems/limit);
+    const totalPages = Math.ceil(totalItems / limit);
 
     return res.status(200).json({
       msg: "Transactions fetched successfully",
@@ -121,160 +134,176 @@ const getAllExpense = async (req, res) => {
         currentPage: page,
         limit: limit,
         totalItems: totalItems,
-        totalPages: totalPages
-      }
+        totalPages: totalPages,
+      },
     });
-
   } catch (err) {
     console.log(err);
     return res.status(500).json({ err: err });
   }
 };
-// update an expense 
-const updateExpense = async(req,res)=>{
-    const t = await sequelize.transaction();
-    try{
-      const expenseId = req.params.id;
-      //now get the data
-      const {
-        amount,
-        description,
-        category,
-        type
-      } = req.body;
+// update an expense
+const updateExpense = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const expenseId = req.params.id;
+    //now get the data
+    const { amount, description, category, type } = req.body;
 
-      const expense = await Expense.findOne({
-        where:{
-          id:expenseId,
-          userId:req.user.id
-        },
-        
-          transaction:t
-        
-      });
-      
-      if(!expense){
-        await t.rollback();
-        return res.status(404).json({msg:"expense not found"});
-      }
-      //if expense found
-      const oldAmount = expense.amount;
-      const oldType = expense.type;
-
-      //update
-      await expense.update({
-        amount,
-        description,
-        category,
-        type
+    const expense = await Expense.findOne({
+      where: {
+        id: expenseId,
+        userId: req.user.id,
       },
-    {
-      transaction:t
+
+      transaction: t,
+    });
+
+    if (!expense) {
+      await t.rollback();
+      return res.status(404).json({ msg: "expense not found" });
     }
+    //if expense found
+    const oldAmount = expense.amount;
+    const oldType = expense.type;
+
+    //update
+    await expense.update(
+      {
+        amount,
+        description,
+        category,
+        type,
+      },
+      {
+        transaction: t,
+      },
     );
     const newAmount = amount;
-      //case 1 if old and new both r expense
-      if(type === "expense" && oldType === "expense"){
-        const diff = newAmount-oldAmount;
-        await User.increment("totalExpense",{
-          by:diff,
-          where:{
-            id:req.user.id
-          },
-          transaction:t
-        });
 
-      }
-      //case 2 if old is expense new is income
-      if(type==="income" && oldType==="expense"){
-        await User.increment("totalExpense",{
-          by:-oldAmount,
-          where:{
-            id:req.user.id
-          },
-          transaction:t
-        })
-      }
-      //case 3 old was income new one is expense
-      if(type==="expense" && oldType==="income"){
-        await User.increment("totalExpense",{
-          by:newAmount,
-          where:{
-            id:req.user.id
-          },
-          transaction:t
-        })
-      }
-      //done
-      await t.commit();
-      return res.status(200).json({msg:"updated successfully"});
+    if (oldType === "expense" && type === "expense") {
+      const diff = newAmount - oldAmount;
+      await User.increment("totalExpense", {
+        by: diff,
+        where: { id: req.user.id },
+        transaction: t,
+      });
+    } else if (oldType === "expense" && type === "income") {
+      await User.increment("totalExpense", {
+        by: -oldAmount,
+        where: { id: req.user.id },
+        transaction: t,
+      });
+      await User.increment("totalIncome", {
+        by: newAmount,
+        where: { id: req.user.id },
+        transaction: t,
+      });
+    } else if (oldType === "income" && type === "expense") {
+      await User.increment("totalIncome", {
+        by: -oldAmount,
+        where: { id: req.user.id },
+        transaction: t,
+      });
+      await User.increment("totalExpense", {
+        by: newAmount,
+        where: { id: req.user.id },
+        transaction: t,
+      });
+    } else if (oldType === "income" && type === "income") {
+      const diff = newAmount - oldAmount;
+      await User.increment("totalIncome", {
+        by: diff,
+        where: { id: req.user.id },
+        transaction: t,
+      });
     }
-    catch(err){
-     await t.rollback();
-      console.log(err.message);
-      return res.status(500).json({msg:err.message});
-    }
-}
+    //done
+    await t.commit();
+    return res.status(200).json({ msg: "updated successfully" });
+  } catch (err) {
+    await t.rollback();
+    console.log(err.message);
+    return res.status(500).json({ msg: err.message });
+  }
+};
 
-const deleteExpense = async(req,res)=>{
-    const t =await sequelize.transaction();
-    try{
-        // get the id find it and delete it
-        const expenseId = req.params.id;
-       
-        const expense = await Expense.findOne({where:{id:expenseId,userId:req.user.id},transaction:t});
-        if(!expense){
-            await t.rollback();
-            return res.status(404).json({msg:'expense not found'});
-        }
-        
-        // now update total expense
-        const amount = expense.amount;
-        const deleteExp = await Expense.destroy({where:{id:expenseId,userId:req.user.id},transaction:t});
-     if(expense.type==='expense') await  User.increment('totalExpense',{by:-amount,where:{id:req.user.id},transaction:t});
-      await t.commit();
-        console.log('deleted',deleteExp);
-        return res.status(200).json({msg:'deleted successfully',data:deleteExp});
+const deleteExpense = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    // get the id find it and delete it
+    const expenseId = req.params.id;
+
+    const expense = await Expense.findOne({
+      where: { id: expenseId, userId: req.user.id },
+      transaction: t,
+    });
+    if (!expense) {
+      await t.rollback();
+      return res.status(404).json({ msg: "expense not found" });
     }
-    catch(err){
-        await  t.rollback();
-        console.log(err);
-        return res.status(500).json({err:err});
-    }
-}
-const getTransactionSummary = async(req,res)=>{
-  try{
-    const {id} = req.user;
+
+    // now update total expense
+    const amount = expense.amount;
+    const deleteExp = await Expense.destroy({
+      where: { id: expenseId, userId: req.user.id },
+      transaction: t,
+    });
+    if (expense.type === "expense")
+      await User.increment("totalExpense", {
+        by: -amount,
+        where: { id: req.user.id },
+        transaction: t,
+      });
+    else if (expense.type === "income")
+      await User.increment("totalIncome", {
+        by: -amount,
+        where: { id: req.user.id },
+        transaction: t,
+      });
+    await t.commit();
+    console.log("deleted", deleteExp);
+    return res
+      .status(200)
+      .json({ msg: "deleted successfully", data: deleteExp });
+  } catch (err) {
+    await t.rollback();
+    console.log(err);
+    return res.status(500).json({ err: err });
+  }
+};
+const getTransactionSummary = async (req, res) => {
+  try {
+    const { id } = req.user;
     const transactions = await Expense.findAll({
-      where:{
-        userId:id
-      }
+      where: {
+        userId: id,
+      },
     });
 
     //now traverse and find all
     let totalIncome = 0;
     let totalExpense = 0;
-    transactions.forEach((transaction)=>{
+    transactions.forEach((transaction) => {
       const amount = Number(transaction.amount);
-      if(transaction.type==="expense")totalExpense+=amount;
-      else if(transaction.type==="income")totalIncome+=amount;
+      if (transaction.type === "expense") totalExpense += amount;
+      else if (transaction.type === "income") totalIncome += amount;
     });
 
-    const balance = totalIncome-totalExpense;
+    const balance = totalIncome - totalExpense;
     return res.status(200).json({
-      msg:"fetch successfully",
-      data:{
-        totalIncome:totalIncome,
-        totalExpense:totalExpense,
-        balance:balance
-      }
+      msg: "fetch successfully",
+      data: {
+        totalIncome: totalIncome,
+        totalExpense: totalExpense,
+        balance: balance,
+      },
     });
-  }
-  catch(err){
+  } catch (err) {
     console.log(err.message);
-    return res.status(500).json({msg:err.message});
+    return res.status(500).json({ msg: err.message });
   }
-}
+};
 
 const getDayWiseSummary = async (req, res) => {
   try {
@@ -291,9 +320,9 @@ const getDayWiseSummary = async (req, res) => {
     const dayTransactions = await Expense.findAll({
       where: {
         userId: id,
-        date: { [Op.gte]: startOfDay, [Op.lte]: endOfDay }
+        date: { [Op.gte]: startOfDay, [Op.lte]: endOfDay },
       },
-      order: [["date", "DESC"]]
+      order: [["date", "DESC"]],
     });
 
     let totalIncome = 0;
@@ -309,7 +338,7 @@ const getDayWiseSummary = async (req, res) => {
       category: t.category,
       amount: t.amount,
       date: t.date,
-      type: t.type
+      type: t.type,
     }));
 
     return res.status(200).json({
@@ -318,7 +347,7 @@ const getDayWiseSummary = async (req, res) => {
       totalExpense,
       netAmount: totalIncome - totalExpense,
       transLength: dayTransactions.length,
-      transactions
+      transactions,
     });
   } catch (err) {
     console.log(err.message);
@@ -332,7 +361,7 @@ const getReport = async (req, res) => {
 
     if (!startDate || !endDate) {
       return res.status(400).json({
-        msg: "startDate and endDate are required"
+        msg: "startDate and endDate are required",
       });
     }
 
@@ -345,10 +374,10 @@ const getReport = async (req, res) => {
         userId: id,
         date: {
           [Op.gte]: start,
-          [Op.lte]: end
-        }
+          [Op.lte]: end,
+        },
       },
-      order: [["date", "ASC"]]
+      order: [["date", "ASC"]],
     });
 
     let totalIncome = 0;
@@ -396,15 +425,14 @@ const getReport = async (req, res) => {
 
         categoryWiseExpense,
 
-        transactions
-      }
+        transactions,
+      },
     });
-
   } catch (err) {
     console.log(err.message);
 
     return res.status(500).json({
-      msg: err.message
+      msg: err.message,
     });
   }
 };
@@ -417,7 +445,7 @@ const renderDashboard = async (req, res) => {
 
     const allTransactions = await Expense.findAll({
       where: { userId: id },
-      order: [["date", "DESC"]]
+      order: [["date", "DESC"]],
     });
 
     let totalIncome = 0;
@@ -428,7 +456,20 @@ const renderDashboard = async (req, res) => {
       else if (t.type === "expense") totalExpense += amt;
     });
 
-    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const now = new Date();
     const monthTotals = [];
     for (let i = 5; i >= 0; i--) {
@@ -438,7 +479,11 @@ const renderDashboard = async (req, res) => {
       const sum = allTransactions
         .filter((t) => {
           const td = new Date(t.date);
-          return t.type === "expense" && td.getMonth() === month && td.getFullYear() === year;
+          return (
+            t.type === "expense" &&
+            td.getMonth() === month &&
+            td.getFullYear() === year
+          );
         })
         .reduce((acc, t) => acc + Number(t.amount), 0);
       monthTotals.push({ month: monthNames[month], total: sum });
@@ -447,22 +492,22 @@ const renderDashboard = async (req, res) => {
     const maxTotal = Math.max(...monthTotals.map((m) => m.total), 1);
     const completeHeights = monthTotals.map((m) => ({
       month: m.month,
-      height: Math.round((m.total / maxTotal) * 100)
+      height: Math.round((m.total / maxTotal) * 100),
     }));
 
     const transactions = allTransactions.slice(0, 5).map((t) => ({
       title: t.description,
       date: new Date(t.date).toLocaleDateString(),
       amount: t.amount,
-      type: t.type
+      type: t.type,
     }));
 
     return res.render("home", {
-      user,          
+      user,
       totalIncome,
       totalExpense,
       completeHeights,
-      transactions
+      transactions,
     });
   } catch (err) {
     console.log(err.message);
@@ -471,37 +516,62 @@ const renderDashboard = async (req, res) => {
 };
 
 const addExpenseForm = async (req, res) => {
-  const t = await sequelize.transaction();
-  try {
-    const { amount, title, category, type, desc } = req.body;
+    const t = await sequelize.transaction();
 
-    if (!amount || !title || !category || !type) {
-      await t.rollback();
-      return res.status(400).send("Please fill all required fields");
+    try {
+        const { amount, title, category, type, desc } = req.body;
+
+        if (!amount || !title || !category || !type) {
+            await t.rollback();
+            return res.status(400).send("Please fill all required fields");
+        }
+
+        const { id } = req.user;
+
+        await Expense.create(
+            {
+                amount,
+                description: title,
+                category,
+                type,
+                userId: id,
+            },
+            { transaction: t }
+        );
+
+        // Update user's totals
+        if (type === "expense") {
+
+            await User.increment("totalExpense", {
+                by: Number(amount),
+                where: { id },
+                transaction: t,
+            });
+
+        } else if (type === "income") {
+
+            await User.increment("totalIncome", {
+                by: Number(amount),
+                where: { id },
+                transaction: t,
+            });
+
+        }
+
+        await t.commit();
+
+        return res.redirect("/");
+
+    } catch (err) {
+
+        await t.rollback();
+
+        console.log(err.message);
+
+        return res
+            .status(500)
+            .send("Something went wrong creating the transaction");
     }
-
-    const { id } = req.user;
-await Expense.create(
-      {
-        amount,
-        description: title,   // form's "title" maps to your model's "description"
-        category,
-        type,
-        userId: id
-      },
-      { transaction: t }
-    );
-
-    if (type === "expense") {
-      await User.increment("totalExpense", { by: amount, where: { id }, transaction: t });
-    }
- await t.commit();
-    return res.redirect("/");
-  } catch (err) {
-    await t.rollback();
-    console.log(err.message);
-    return res.status(500).send("Something went wrong creating the transaction");
-  }
 };
 const filterExpenses = async (req, res) => {
   try {
@@ -545,11 +615,11 @@ const filterExpenses = async (req, res) => {
       }
     }
 
-   const result = await Expense.findAndCountAll({
+    const result = await Expense.findAndCountAll({
       where,
       limit,
       offset,
-      order: [["date", "DESC"]]
+      order: [["date", "DESC"]],
     });
 
     const data = result.rows.map((t) => ({
@@ -559,16 +629,114 @@ const filterExpenses = async (req, res) => {
       category: t.category,
       date: new Date(t.date).toLocaleDateString(),
       amount: t.amount,
-      type: t.type
+      type: t.type,
     }));
 
     return res.status(200).json({
       data,
-      count: result.count
+      count: result.count,
     });
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({ msg: err.message });
   }
 };
-module.exports = { addExpense ,updateExpense,getAllExpense,deleteExpense,getTransactionSummary,getDayWiseSummary,getReport,renderDashboard,addExpenseForm,filterExpenses};
+const renderEditPage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const expense = await Expense.findOne({
+      where: { id, userId: req.user.id },
+    });
+    if (!expense) return res.status(404).send("Transaction not found");
+    return res.render("edit", { transaction: expense });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).send("Something went wrong");
+  }
+};
+const renderReportPage = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const now = new Date();
+
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+    const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000 - 1);
+
+    const todayTransactions = await Expense.findAll({
+      where: { userId: id, date: { [Op.gte]: startOfDay, [Op.lte]: endOfDay } },
+      order: [["date", "DESC"]],
+    });
+
+    const daywiseExp = todayTransactions
+      .filter((t) => t.type === "expense")
+      .map((t) => ({ date: t.date, title: t.description, amount: t.amount }));
+
+    const daywiseIncome = todayTransactions
+      .filter((t) => t.type === "income")
+      .map((t) => ({ date: t.date, title: t.description, amount: t.amount }));
+
+    const allTransactions = await Expense.findAll({ where: { userId: id } });
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const monthlyReport = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const month = d.getMonth();
+      const year = d.getFullYear();
+      let income = 0,
+        expense = 0;
+
+      allTransactions.forEach((t) => {
+        const td = new Date(t.date);
+        if (td.getMonth() === month && td.getFullYear() === year) {
+          const amt = Number(t.amount);
+          if (t.type === "income") income += amt;
+          else if (t.type === "expense") expense += amt;
+        }
+      });
+
+      monthlyReport.push({
+        month: monthNames[month],
+        income,
+        expense,
+        savings: income - expense,
+      });
+    }
+
+    return res.render("report", { daywiseExp, daywiseIncome, monthlyReport });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).send("Something went wrong loading the report");
+  }
+};
+module.exports = {
+  addExpense,
+  updateExpense,
+  getAllExpense,
+  deleteExpense,
+  getTransactionSummary,
+  getDayWiseSummary,
+  getReport,
+  renderDashboard,
+  addExpenseForm,
+  filterExpenses,
+  renderEditPage,
+  renderReportPage,
+};

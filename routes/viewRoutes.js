@@ -109,3 +109,5 @@ router.get(
     isPremium,
     renderLeaderboardPage
 );
+
+module.exports = router;

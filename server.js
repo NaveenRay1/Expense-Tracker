@@ -66,17 +66,23 @@ app.use("/report", reportRoutes);
 // START SERVER
 // ==========================================
 
-const startServer = async () => {
-    try {
-        await sequelize.sync();
-
-        console.log("Database connected");
-    } catch (err) {
-        console.error("Server startup error:", err);
-        process.exit(1);
-    }
-};
-
-startServer();
-
 module.exports = app;
+
+if (require.main === module) {
+    const startServer = async () => {
+        try {
+            await sequelize.sync();
+
+            const PORT = process.env.PORT || 3000;
+
+            app.listen(PORT, () => {
+                console.log(`Server is running on port ${PORT}`);
+            });
+        } catch (err) {
+            console.error("Server startup error:", err);
+            process.exit(1);
+        }
+    };
+
+    startServer();
+}

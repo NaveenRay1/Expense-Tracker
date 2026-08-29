@@ -1,4 +1,6 @@
 const { Sequelize } = require("sequelize");
+const mysql2 = require("mysql2");
+
 require("dotenv").config();
 
 const sequelize = new Sequelize(
@@ -10,6 +12,8 @@ const sequelize = new Sequelize(
         port: process.env.DB_PORT,
         dialect: "mysql",
 
+        dialectModule: mysql2,
+
         dialectOptions: {
             ssl: {
                 require: true,
@@ -18,10 +22,5 @@ const sequelize = new Sequelize(
         }
     }
 );
-
-sequelize
-    .authenticate()
-    .then(() => console.log("database successfully connected"))
-    .catch((err) => console.log(err));
 
 module.exports = sequelize;

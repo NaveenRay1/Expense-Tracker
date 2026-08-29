@@ -32,6 +32,11 @@ const {
 // ==========================================
 
 router.get(
+    "/",
+    renderLoginPage
+);
+
+router.get(
     "/login",
     renderLoginPage
 );
@@ -46,13 +51,12 @@ router.get(
     renderResetPasswordPage
 );
 
-
 // ==========================================
 // AUTHENTICATED PAGES
 // ==========================================
 
 router.get(
-    "/",
+    "/dashboard",
     authenticate,
     renderDashboard
 );
@@ -81,7 +85,6 @@ router.get(
     renderEditPage
 );
 
-
 // ==========================================
 // PREMIUM PAGES
 // ==========================================
@@ -106,7 +109,3 @@ router.get(
     isPremium,
     renderLeaderboardPage
 );
-
-
-module.exports = router;
-

@@ -4,24 +4,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker - Daywise Transactions</title>
+
+    <title>ExpenseTracker - Daywise Transactions</title>
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+    <!-- Flatpickr -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    >
+
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <style>
         :root {
             --primary: #4f46e5;
-            --secondary: #3f37c9;
-            --success: #4cc9f0;
-            --danger: #f72585;
-            --warning: #f8961e;
-            --light: #f8f9fa;
+            --primary-dark: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --info: #3b82f6;
             --dark: #4338ca;
-            --gray: #6c757d;
-            --light: #e9ecef;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
         }
     </style>
+
     <script>
         tailwind.config = {
             theme: {
@@ -31,354 +49,1503 @@
                         'primary-dark': '#4338ca',
                         success: '#10b981',
                         danger: '#ef4444',
-                        warning: '#f59e0b',
                         info: '#3b82f6'
                     }
                 }
             }
-        }
+        };
     </script>
 </head>
 
+
 <body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
+
+    <!-- ==================== NAVBAR ==================== -->
+
     <div>
-        <%- include('partials/navbar',{user:user}) %>
+        <%- include('partials/navbar', { user: user }) %>
     </div>
 
-    <!-- Main Content -->
-    <div class="container mx-auto px-4 py-8">
+
+    <!-- ==================== MAIN ==================== -->
+
+    <main class="container mx-auto px-4 py-8">
+
         <!-- Page Header -->
+
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+
             <div>
-                <h2 class="text-2xl font-bold text-gray-800">Daywise Transactions</h2>
-                <p class="text-gray-600">View and manage your daily financial activities</p>
+                <h2 class="text-2xl font-bold text-gray-800">
+                    Daywise Transactions
+                </h2>
+
+                <p class="text-gray-600 mt-1">
+                    View and manage your daily financial activities
+                </p>
             </div>
+
+
+            <!-- Search -->
+
             <div class="mt-4 md:mt-0">
+
                 <div class="flex items-center space-x-2 bg-white rounded-lg shadow-sm px-4 py-2">
+
                     <i class="fas fa-search text-gray-400"></i>
-                    <input type="text" placeholder="Search transactions..." class="outline-none bg-transparent w-64">
+
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Search transactions..."
+                        class="outline-none bg-transparent w-64"
+                    >
+
                 </div>
+
             </div>
+
         </div>
 
-        <!-- Date Navigation Card -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+
+
+        <!-- ==================== DATE NAVIGATION ==================== -->
+
+        <section class="bg-white rounded-xl shadow-sm p-6 mb-8">
+
             <div class="flex flex-col md:flex-row justify-between items-center">
+
+                <!-- Previous / Current / Next -->
+
                 <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                    <button id="prev-day"
-                        class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition">
+
+                    <!-- Previous -->
+
+                    <button
+                        id="prev-day"
+                        type="button"
+                        aria-label="Previous day"
+                        class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition"
+                    >
                         <i class="fas fa-chevron-left text-gray-600"></i>
                     </button>
 
-                    <div class="text-center">
-                        <h3 id="current-date" class="text-xl font-bold text-gray-800">October 31, 2025</h3>
-                        <p id="day-of-week" class="text-gray-500">Friday</p>
+
+                    <!-- Current date -->
+
+                    <div class="text-center min-w-[190px]">
+
+                        <h3
+                            id="current-date"
+                            class="text-xl font-bold text-gray-800"
+                        >
+                            Loading...
+                        </h3>
+
+                        <p
+                            id="day-of-week"
+                            class="text-gray-500"
+                        >
+                            --
+                        </p>
+
                     </div>
 
-                    <button id="next-day"
-                        class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition">
+
+                    <!-- Next -->
+
+                    <button
+                        id="next-day"
+                        type="button"
+                        aria-label="Next day"
+                        class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition"
+                    >
                         <i class="fas fa-chevron-right text-gray-600"></i>
                     </button>
+
                 </div>
 
+
+
+                <!-- Today + Calendar -->
+
                 <div class="flex items-center space-x-4">
-                    <button id="today-btn"
-                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition">
+
+                    <button
+                        id="today-btn"
+                        type="button"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition"
+                    >
                         Today
                     </button>
 
+
                     <div class="relative">
-                        <input type="text" id="date-picker"
+
+                        <input
+                            type="text"
+                            id="date-picker"
                             class="w-48 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
-                            placeholder="Select Date">
-                        <i class="fas fa-calendar-alt absolute right-3 top-3 text-gray-400 pointer-events-none"></i>
+                            placeholder="Select Date"
+                            readonly
+                        >
+
+                        <i
+                            class="fas fa-calendar-alt absolute right-3 top-3 text-gray-400 pointer-events-none"
+                        ></i>
+
                     </div>
+
                 </div>
+
             </div>
 
+        </section>
 
-        </div>
 
-        <!-- Daily Summary -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+
+        <!-- ==================== DAILY SUMMARY ==================== -->
+
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+
+
+            <!-- Total Income -->
+
             <div class="bg-white rounded-xl shadow-sm p-6">
+
                 <div class="flex justify-between items-start">
+
                     <div>
-                        <p class="text-gray-500 text-sm">Total Income</p>
-                        <h3 class="text-2xl font-bold text-success mt-1"> ₹<span id="totalIncome"></span></h3>
+
+                        <p class="text-gray-500 text-sm">
+                            Total Income
+                        </p>
+
+                        <h3 class="text-2xl font-bold text-success mt-1">
+                            ₹<span id="totalIncome">0</span>
+                        </h3>
+
                     </div>
+
                     <div class="bg-green-100 text-success p-3 rounded-lg">
+
                         <i class="fas fa-arrow-up text-lg"></i>
+
                     </div>
+
                 </div>
 
             </div>
 
+
+
+            <!-- Total Expenses -->
+
             <div class="bg-white rounded-xl shadow-sm p-6">
+
                 <div class="flex justify-between items-start">
+
                     <div>
-                        <p class="text-gray-500 text-sm">Total Expenses</p>
-                        <h3 class="text-2xl font-bold text-danger mt-1">₹<span id="totalExpense"></span></h3>
+
+                        <p class="text-gray-500 text-sm">
+                            Total Expenses
+                        </p>
+
+                        <h3 class="text-2xl font-bold text-danger mt-1">
+                            ₹<span id="totalExpense">0</span>
+                        </h3>
+
                     </div>
+
                     <div class="bg-red-100 text-danger p-3 rounded-lg">
+
                         <i class="fas fa-arrow-down text-lg"></i>
+
                     </div>
+
                 </div>
 
             </div>
 
+
+
+            <!-- Net Amount -->
+
             <div class="bg-white rounded-xl shadow-sm p-6">
+
                 <div class="flex justify-between items-start">
+
                     <div>
-                        <p class="text-gray-500 text-sm">Net Amount</p>
-                        <h3 class="text-2xl font-bold text-info mt-1">₹<span id="netAmount"></span></h3>
+
+                        <p class="text-gray-500 text-sm">
+                            Net Amount
+                        </p>
+
+                        <h3 class="text-2xl font-bold text-info mt-1">
+                            ₹<span id="netAmount">0</span>
+                        </h3>
+
                     </div>
+
                     <div class="bg-blue-100 text-info p-3 rounded-lg">
+
                         <i class="fas fa-wallet text-lg"></i>
+
                     </div>
+
                 </div>
 
             </div>
+
+
+
+            <!-- Transaction Count -->
 
             <div class="bg-white rounded-xl shadow-sm p-6">
+
                 <div class="flex justify-between items-start">
+
                     <div>
-                        <p class="text-gray-500 text-sm">Transactions</p>
-                        <h3 id="totalTransactions" class="text-2xl font-bold text-gray-800 mt-1">7</h3>
+
+                        <p class="text-gray-500 text-sm">
+                            Transactions
+                        </p>
+
+                        <h3
+                            id="totalTransactions"
+                            class="text-2xl font-bold text-gray-800 mt-1"
+                        >
+                            0
+                        </h3>
+
                     </div>
+
                     <div class="bg-purple-100 text-purple-600 p-3 rounded-lg">
+
                         <i class="fas fa-receipt text-lg"></i>
+
                     </div>
+
                 </div>
+
                 <p class="text-gray-600 text-sm mt-2 flex items-center">
-                    <i class="fas fa-clock mr-1"></i> All day
+
+                    <i class="fas fa-clock mr-1"></i>
+
+                    All day
+
                 </p>
-            </div>
-        </div>
-
-        <!-- Transactions List -->
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-semibold text-gray-800">Transactions for <span id="transactions-date">October
-                        31, 2025</span></h3>
 
             </div>
 
-            <!-- Time Segments -->
-            <div class="divide-y divide-gray-100">
-                <!-- Morning Section -->
+        </section>
+
+
+
+        <!-- ==================== TRANSACTIONS ==================== -->
+
+        <section class="bg-white rounded-xl shadow-sm overflow-hidden">
+
+
+            <!-- Header -->
+
+            <div class="px-6 py-4 border-b border-gray-200">
+
+                <h3 class="text-lg font-semibold text-gray-800">
+
+                    Transactions for
+
+                    <span id="transactions-date">
+                        Loading...
+                    </span>
+
+                </h3>
+
+            </div>
+
+
+
+            <!-- Transactions -->
+
+            <div id="transactions-container">
+
                 <div class="p-6">
+
+
+                    <!-- Today label -->
+
                     <div class="flex items-center mb-4">
+
                         <div class="w-3 h-3 bg-orange-400 rounded-full mr-3"></div>
-                        <h4 class="font-medium text-gray-700">Today</h4>
 
-
-                    </div>
-
-                    <div id="morning" class="space-y-4">
-
-
-
+                        <h4 class="font-medium text-gray-700">
+                            Transactions
+                        </h4>
 
                     </div>
+
+
+                    <!-- Actual transaction list -->
+
+                    <div
+                        id="morning"
+                        class="space-y-4"
+                    >
+                    </div>
+
+
                 </div>
-
-
-
 
             </div>
 
-            <!-- Empty State (for demonstration) -->
-            <div id="empty-state" class="hidden p-12 text-center">
+
+
+            <!-- Empty State -->
+
+            <div
+                id="empty-state"
+                class="hidden p-12 text-center"
+            >
+
                 <i class="fas fa-receipt text-4xl text-gray-300 mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-700 mb-2">No transactions for this day</h3>
-                <p class="text-gray-500 mb-6">You haven't recorded any transactions for this date.</p>
+
+                <h3 class="text-lg font-medium text-gray-700 mb-2">
+                    No transactions for this day
+                </h3>
+
+                <p class="text-gray-500">
+                    You haven't recorded any transactions for this date.
+                </p>
 
             </div>
-        </div>
-    </div>
 
-    <!-- Footer -->
+
+            <!-- Error State -->
+
+            <div
+                id="error-state"
+                class="hidden p-12 text-center"
+            >
+
+                <i class="fas fa-exclamation-circle text-4xl text-red-300 mb-4"></i>
+
+                <h3 class="text-lg font-medium text-gray-700 mb-2">
+                    Could not load transactions
+                </h3>
+
+                <p class="text-gray-500 mb-4">
+                    Something went wrong while loading this date.
+                </p>
+
+                <button
+                    id="retry-btn"
+                    type="button"
+                    class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
+                >
+                    Try Again
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- ==================== FOOTER ==================== -->
+
     <footer class="bg-gray-800 text-white mt-12">
+
         <div class="container mx-auto px-4 py-8">
+
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+
+                <!-- About -->
+
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">ExpenseTracker</h3>
-                    <p class="text-gray-400">Take control of your finances with our intuitive expense tracking app.</p>
+
+                    <h3 class="text-lg font-semibold mb-4">
+                        ExpenseTracker
+                    </h3>
+
+                    <p class="text-gray-400">
+                        Take control of your finances with our intuitive
+                        expense tracking app.
+                    </p>
+
                 </div>
+
+
+
+                <!-- Quick Links -->
+
                 <div>
-                    <h4 class="text-md font-semibold mb-4">Quick Links</h4>
+
+                    <h4 class="text-md font-semibold mb-4">
+                        Quick Links
+                    </h4>
+
                     <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">Dashboard</a></li>
-                        <li><a href="#" class="hover:text-white transition">Transactions</a></li>
-                        <li><a href="#" class="hover:text-white transition">Budgets</a></li>
-                        <li><a href="#" class="hover:text-white transition">Reports</a></li>
+
+                        <li>
+                            <a
+                                href="/"
+                                class="hover:text-white transition"
+                            >
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                href="/transactions"
+                                class="hover:text-white transition"
+                            >
+                                Transactions
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                href="/reports"
+                                class="hover:text-white transition"
+                            >
+                                Reports
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                href="/leaderboard"
+                                class="hover:text-white transition"
+                            >
+                                Leaderboard
+                            </a>
+                        </li>
+
                     </ul>
+
                 </div>
+
+
+
+                <!-- Resources -->
+
                 <div>
-                    <h4 class="text-md font-semibold mb-4">Resources</h4>
+
+                    <h4 class="text-md font-semibold mb-4">
+                        Resources
+                    </h4>
+
                     <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">Help Center</a></li>
-                        <li><a href="#" class="hover:text-white transition">Financial Tips</a></li>
-                        <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+
+                        <li>
+                            <span>
+                                Help Center
+                            </span>
+                        </li>
+
+                        <li>
+                            <span>
+                                Financial Tips
+                            </span>
+                        </li>
+
+                        <li>
+                            <span>
+                                Privacy Policy
+                            </span>
+                        </li>
+
+                        <li>
+                            <span>
+                                Terms of Service
+                            </span>
+                        </li>
+
                     </ul>
+
                 </div>
+
+
+
+                <!-- App -->
+
                 <div>
-                    <h4 class="text-md font-semibold mb-4">Get the App</h4>
+
+                    <h4 class="text-md font-semibold mb-4">
+                        Get the App
+                    </h4>
+
                     <div class="flex flex-col space-y-2">
+
                         <button
-                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center">
-                            <i class="fab fa-apple mr-2"></i> App Store
+                            type="button"
+                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center"
+                        >
+                            <i class="fab fa-apple mr-2"></i>
+                            App Store
                         </button>
+
                         <button
-                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center">
-                            <i class="fab fa-google-play mr-2"></i> Google Play
+                            type="button"
+                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center"
+                        >
+                            <i class="fab fa-google-play mr-2"></i>
+                            Google Play
                         </button>
+
                     </div>
+
                 </div>
+
             </div>
+
+
+
             <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
-                <p>&copy; 2023 ExpenseTracker. All rights reserved.</p>
+
+                <p>
+                    &copy; 2026 ExpenseTracker. All rights reserved.
+                </p>
+
             </div>
+
         </div>
+
     </footer>
 
+
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize date picker
-            const datePicker = flatpickr("#date-picker", {
-                dateFormat: "Y-m-d",
-                defaultDate: "2025-10-31",
-                onChange: function (selectedDates, dateStr, instance) {
-                    if (dateStr) {
-                        updateDisplayedDate(new Date(dateStr));
-                    }
-                }
-            });
 
-            // Set initial date
-            let currentDate = new Date();
-            updateDisplayedDate(currentDate);
-
-            // Previous day button
-            document.getElementById('prev-day').addEventListener('click', function () {
-                currentDate.setDate(currentDate.getDate() - 1);
-                updateDisplayedDate(currentDate);
-                datePicker.setDate(currentDate);
-            });
-
-            // Next day button
-            document.getElementById('next-day').addEventListener('click', function () {
-                currentDate.setDate(currentDate.getDate() + 1);
-                updateDisplayedDate(currentDate);
-                datePicker.setDate(currentDate);
-            });
-
-            // Today button
-            document.getElementById('today-btn').addEventListener('click', function () {
-                currentDate = new Date();
-                updateDisplayedDate(currentDate);
-                datePicker.setDate(currentDate);
-            });
+        document.addEventListener("DOMContentLoaded", function () {
 
 
+            /*
+             * ==========================================================
+             * VARIABLES
+             * ==========================================================
+             */
 
-            // Function to update displayed date
-            function updateDisplayedDate(date) {
-                const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                const dayOptions = { weekday: 'long' };
+            let currentDate = getToday();
 
-                document.getElementById('current-date').textContent = date.toLocaleDateString('en-US', options);
-                document.getElementById('day-of-week').textContent = date.toLocaleDateString('en-US', dayOptions);
-                document.getElementById('transactions-date').textContent = date.toLocaleDateString('en-US', options);
-
-                // For demonstration, show/hide empty state based on date
-                // In a real app, you would fetch transactions for the selected date
-                const emptyState = document.getElementById('empty-state');
-                const transactionsList = document.querySelector('.divide-y');
-                
-                const dateStr = date.toISOString().slice(0, 10);   // "2025-10-31" format
-                console.log(dateStr);
-
-                fetch(`/expense/day-wise?date=${dateStr}`, { method: 'GET' })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.transactions && data.transactions.length > 0) {
-                            emptyState.classList.add('hidden');
-                            transactionsList.classList.remove('hidden')
-                            let trans = data.transactions;
-                            const morningDiv = document.getElementById('morning');
-
-                            morningDiv.innerHTML = '';
+            let requestNumber = 0;
 
 
-                            trans.forEach(t => {
-                                const date = new Date(t.date);
-                                const time = date.toLocaleTimeString();
+            const prevButton =
+                document.getElementById("prev-day");
+
+            const nextButton =
+                document.getElementById("next-day");
+
+            const todayButton =
+                document.getElementById("today-btn");
+
+            const datePickerElement =
+                document.getElementById("date-picker");
+
+            const transactionsContainer =
+                document.getElementById("transactions-container");
+
+            const transactionsList =
+                document.getElementById("morning");
+
+            const emptyState =
+                document.getElementById("empty-state");
+
+            const errorState =
+                document.getElementById("error-state");
+
+            const retryButton =
+                document.getElementById("retry-btn");
+
+            const searchInput =
+                document.getElementById("search-input");
 
 
 
-                                morningDiv.innerHTML += `
-                                      <div
-                            class="trans flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                            <div class="flex items-center">
-                                <div
-                                    class="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-film text-blue-600"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900">${t.category}</div>
-                                    <div class="text-sm text-gray-500">${t.title}</div>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-sm font-medium text-blue-500">₹${t.amount}</div>
-                                <div class="text-sm text-gray-500">${time}</div>
-                            </div>
-                        </div>
-                                   
-                                    `
-                            });
+            /*
+             * ==========================================================
+             * DATE HELPERS
+             * ==========================================================
+             */
 
 
-                        } else {
-                            emptyState.classList.remove('hidden');
-                            transactionsList.classList.add('hidden');
-                        }
-                        document.getElementById('totalIncome').innerHTML = data.totalIncome;
-                        document.getElementById('totalExpense').innerHTML = data.totalExpense;
-                        document.getElementById('netAmount').innerHTML = data.netAmount;
-                        document.getElementById('totalTransactions').innerHTML = data.transLength;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching transactions:', error);
-                        emptyState.classList.remove('hidden');
-                        // transactionsList.classList.add('hidden');
-                    });
+            // Returns today's date at local midnight
+            function getToday() {
 
+                const now = new Date();
 
+                return new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate()
+                );
 
             }
 
-            // Search functionality
-            const searchInput = document.querySelector('input[type="text"]');
-            searchInput.addEventListener('input', function () {
-                const searchTerm = this.value.toLowerCase();
-                const transactions = document.querySelectorAll('.trans');
 
-                transactions.forEach(transaction => {
-                    const text = transaction.textContent.toLowerCase();
-                    if (text.includes(searchTerm)) {
-                        transaction.style.display = 'flex';
-                    } else {
-                        transaction.style.display = 'none';
+            // Creates a safe local date
+            function createLocalDate(year, month, day) {
+
+                return new Date(
+                    year,
+                    month,
+                    day,
+                    12,
+                    0,
+                    0
+                );
+
+            }
+
+
+            // Convert Date -> YYYY-MM-DD
+            //
+            // IMPORTANT:
+            // We intentionally DO NOT use toISOString()
+            // because that converts the date to UTC.
+
+            function formatDateForApi(date) {
+
+                const year =
+                    date.getFullYear();
+
+                const month =
+                    String(date.getMonth() + 1)
+                        .padStart(2, "0");
+
+                const day =
+                    String(date.getDate())
+                        .padStart(2, "0");
+
+                return `${year}-${month}-${day}`;
+            }
+
+
+
+            // Display date nicely
+
+            function formatDisplayDate(date) {
+
+                return date.toLocaleDateString(
+                    "en-US",
+                    {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric"
                     }
+                );
+
+            }
+
+
+            // Display weekday
+
+            function formatDayName(date) {
+
+                return date.toLocaleDateString(
+                    "en-US",
+                    {
+                        weekday: "long"
+                    }
+                );
+
+            }
+
+
+
+            /*
+             * ==========================================================
+             * FLATPICKR
+             * ==========================================================
+             */
+
+            const datePicker = flatpickr(
+                "#date-picker",
+                {
+
+                    dateFormat: "Y-m-d",
+
+                    defaultDate: currentDate,
+
+                    allowInput: false,
+
+                    onChange: function (selectedDates) {
+
+                        if (!selectedDates.length) {
+                            return;
+                        }
+
+
+                        const selected =
+                            selectedDates[0];
+
+
+                        /*
+                         * Recreate the date using its local
+                         * year/month/day so we don't get
+                         * timezone shifts.
+                         */
+
+                        currentDate = createLocalDate(
+                            selected.getFullYear(),
+                            selected.getMonth(),
+                            selected.getDate()
+                        );
+
+
+                        updateDisplayedDate();
+
+                    }
+
+                }
+            );
+
+
+
+            /*
+             * ==========================================================
+             * DATE BUTTONS
+             * ==========================================================
+             */
+
+
+            // Previous day
+
+            prevButton.addEventListener(
+                "click",
+                function () {
+
+                    currentDate = createLocalDate(
+                        currentDate.getFullYear(),
+                        currentDate.getMonth(),
+                        currentDate.getDate() - 1
+                    );
+
+
+                    datePicker.setDate(
+                        currentDate,
+                        false
+                    );
+
+
+                    updateDisplayedDate();
+
+                }
+            );
+
+
+
+            // Next day
+
+            nextButton.addEventListener(
+                "click",
+                function () {
+
+                    currentDate = createLocalDate(
+                        currentDate.getFullYear(),
+                        currentDate.getMonth(),
+                        currentDate.getDate() + 1
+                    );
+
+
+                    datePicker.setDate(
+                        currentDate,
+                        false
+                    );
+
+
+                    updateDisplayedDate();
+
+                }
+            );
+
+
+
+            // Today
+
+            todayButton.addEventListener(
+                "click",
+                function () {
+
+                    currentDate = getToday();
+
+
+                    datePicker.setDate(
+                        currentDate,
+                        false
+                    );
+
+
+                    updateDisplayedDate();
+
+                }
+            );
+
+
+
+            /*
+             * ==========================================================
+             * UPDATE DISPLAY
+             * ==========================================================
+             */
+
+            function updateDisplayedDate() {
+
+
+                const displayDate =
+                    formatDisplayDate(currentDate);
+
+
+                const dayName =
+                    formatDayName(currentDate);
+
+
+                document.getElementById(
+                    "current-date"
+                ).textContent = displayDate;
+
+
+                document.getElementById(
+                    "day-of-week"
+                ).textContent = dayName;
+
+
+                document.getElementById(
+                    "transactions-date"
+                ).textContent = displayDate;
+
+
+                loadTransactions();
+
+            }
+
+
+
+            /*
+             * ==========================================================
+             * LOAD TRANSACTIONS
+             * ==========================================================
+             */
+
+            async function loadTransactions() {
+
+
+                const dateStr =
+                    formatDateForApi(currentDate);
+
+
+                console.log(
+                    "Loading daywise transactions:",
+                    dateStr
+                );
+
+
+                /*
+                 * Give every request a number.
+                 *
+                 * If the user clicks next/previous very quickly,
+                 * an older request won't overwrite the newest date.
+                 */
+
+                const thisRequest =
+                    ++requestNumber;
+
+
+                showLoading();
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            `/expense/day-wise?date=${encodeURIComponent(dateStr)}`,
+                            {
+                                method: "GET",
+                                credentials: "same-origin"
+                            }
+                        );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            `Request failed: ${response.status}`
+                        );
+
+                    }
+
+
+                    const data =
+                        await response.json();
+
+
+                    /*
+                     * Ignore old request responses.
+                     */
+
+                    if (
+                        thisRequest !== requestNumber
+                    ) {
+                        return;
+                    }
+
+
+                    console.log(
+                        "Daywise response:",
+                        data
+                    );
+
+
+                    renderTransactions(data);
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Error fetching transactions:",
+                        error
+                    );
+
+
+                    /*
+                     * Don't show an old request's
+                     * error over a newer request.
+                     */
+
+                    if (
+                        thisRequest !== requestNumber
+                    ) {
+                        return;
+                    }
+
+
+                    showError();
+
+                }
+
+            }
+
+
+
+            /*
+             * ==========================================================
+             * RENDER TRANSACTIONS
+             * ==========================================================
+             */
+
+            function renderTransactions(data) {
+
+
+                const transactions =
+                    Array.isArray(data.transactions)
+                        ? data.transactions
+                        : [];
+
+
+                /*
+                 * Update summary values.
+                 *
+                 * || 0 prevents blank values.
+                 */
+
+                document.getElementById(
+                    "totalIncome"
+                ).textContent =
+                    Number(data.totalIncome || 0).toLocaleString(
+                        "en-IN"
+                    );
+
+
+                document.getElementById(
+                    "totalExpense"
+                ).textContent =
+                    Number(data.totalExpense || 0).toLocaleString(
+                        "en-IN"
+                    );
+
+
+                document.getElementById(
+                    "netAmount"
+                ).textContent =
+                    Number(data.netAmount || 0).toLocaleString(
+                        "en-IN"
+                    );
+
+
+                document.getElementById(
+                    "totalTransactions"
+                ).textContent =
+                    Number(
+                        data.transLength ??
+                        transactions.length ??
+                        0
+                    );
+
+
+
+                /*
+                 * Clear previous transactions.
+                 */
+
+                transactionsList.innerHTML = "";
+
+
+
+                /*
+                 * No transactions
+                 */
+
+                if (transactions.length === 0) {
+
+                    transactionsContainer.classList.add(
+                        "hidden"
+                    );
+
+                    emptyState.classList.remove(
+                        "hidden"
+                    );
+
+                    errorState.classList.add(
+                        "hidden"
+                    );
+
+                    return;
+
+                }
+
+
+
+                /*
+                 * Transactions exist.
+                 */
+
+                transactionsContainer.classList.remove(
+                    "hidden"
+                );
+
+                emptyState.classList.add(
+                    "hidden"
+                );
+
+                errorState.classList.add(
+                    "hidden"
+                );
+
+
+
+                /*
+                 * Render every transaction.
+                 */
+
+                transactions.forEach(function (transaction) {
+
+
+                    /*
+                     * Your Expense model has:
+                     *
+                     * description
+                     * category
+                     * amount
+                     * type
+                     * date
+                     *
+                     * It does NOT have "title".
+                     *
+                     * So use description first.
+                     */
+
+                    const description =
+                        transaction.description ||
+                        transaction.title ||
+                        "Transaction";
+
+
+                    const category =
+                        transaction.category ||
+                        "Other";
+
+
+                    const amount =
+                        Number(
+                            transaction.amount || 0
+                        );
+
+
+                    const type =
+                        transaction.type ||
+                        "expense";
+
+
+
+                    /*
+                     * Format transaction time.
+                     */
+
+                    let time = "";
+
+                    if (transaction.date) {
+
+                        const transactionDate =
+                            new Date(transaction.date);
+
+
+                        if (
+                            !isNaN(
+                                transactionDate.getTime()
+                            )
+                        ) {
+
+                            time =
+                                transactionDate.toLocaleTimeString(
+                                    "en-IN",
+                                    {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit"
+                                    }
+                                );
+
+                        }
+
+                    }
+
+
+
+                    /*
+                     * Income / expense styling.
+                     */
+
+                    const isIncome =
+                        type.toLowerCase() === "income";
+
+
+                    const amountClass =
+                        isIncome
+                            ? "text-success"
+                            : "text-danger";
+
+
+                    const sign =
+                        isIncome
+                            ? "+"
+                            : "-";
+
+
+                    const icon =
+                        isIncome
+                            ? "fa-arrow-up"
+                            : "fa-arrow-down";
+
+
+                    const iconBg =
+                        isIncome
+                            ? "bg-green-100"
+                            : "bg-red-100";
+
+
+                    const iconColor =
+                        isIncome
+                            ? "text-green-600"
+                            : "text-red-600";
+
+
+
+                    /*
+                     * Create transaction element.
+                     */
+
+                    const transactionElement =
+                        document.createElement("div");
+
+
+                    transactionElement.className =
+                        "trans flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition";
+
+
+                    /*
+                     * Store searchable text.
+                     */
+
+                    transactionElement.dataset.search =
+                        `${category} ${description} ${type}`.toLowerCase();
+
+
+
+                    transactionElement.innerHTML = `
+
+                        <div class="flex items-center">
+
+                            <div
+                                class="flex-shrink-0 h-12 w-12 ${iconBg} rounded-lg flex items-center justify-center"
+                            >
+                                <i
+                                    class="fas ${icon} ${iconColor}"
+                                ></i>
+                            </div>
+
+                            <div class="ml-4">
+
+                                <div class="text-sm font-medium text-gray-900">
+                                    ${escapeHtml(category)}
+                                </div>
+
+                                <div class="text-sm text-gray-500">
+                                    ${escapeHtml(description)}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="text-right">
+
+                            <div class="text-sm font-medium ${amountClass}">
+                                ${sign}₹${amount.toLocaleString("en-IN")}
+                            </div>
+
+                            <div class="text-sm text-gray-500">
+                                ${time}
+                            </div>
+
+                        </div>
+
+                    `;
+
+
+                    transactionsList.appendChild(
+                        transactionElement
+                    );
+
                 });
-            });
+
+
+
+                /*
+                 * Apply current search after rendering.
+                 */
+
+                applySearch();
+
+            }
+
+
+
+            /*
+             * ==========================================================
+             * SEARCH
+             * ==========================================================
+             */
+
+            searchInput.addEventListener(
+                "input",
+                function () {
+
+                    applySearch();
+
+                }
+            );
+
+
+            function applySearch() {
+
+
+                const searchTerm =
+                    searchInput.value
+                        .trim()
+                        .toLowerCase();
+
+
+                const transactions =
+                    document.querySelectorAll(
+                        ".trans"
+                    );
+
+
+                transactions.forEach(
+                    function (transaction) {
+
+
+                        const searchableText =
+                            transaction.dataset.search ||
+                            transaction.textContent.toLowerCase();
+
+
+                        if (
+                            searchableText.includes(
+                                searchTerm
+                            )
+                        ) {
+
+                            transaction.style.display =
+                                "flex";
+
+                        }
+                        else {
+
+                            transaction.style.display =
+                                "none";
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+
+            /*
+             * ==========================================================
+             * LOADING STATE
+             * ==========================================================
+             */
+
+            function showLoading() {
+
+
+                transactionsContainer.classList.remove(
+                    "hidden"
+                );
+
+                emptyState.classList.add(
+                    "hidden"
+                );
+
+                errorState.classList.add(
+                    "hidden"
+                );
+
+
+                transactionsList.innerHTML = `
+
+                    <div class="flex justify-center items-center py-12">
+
+                        <div class="text-center">
+
+                            <i
+                                class="fas fa-spinner fa-spin text-3xl text-primary mb-3"
+                            ></i>
+
+                            <p class="text-gray-500">
+                                Loading transactions...
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                /*
+                 * Reset summary while loading.
+                 */
+
+                document.getElementById(
+                    "totalIncome"
+                ).textContent = "0";
+
+
+                document.getElementById(
+                    "totalExpense"
+                ).textContent = "0";
+
+
+                document.getElementById(
+                    "netAmount"
+                ).textContent = "0";
+
+
+                document.getElementById(
+                    "totalTransactions"
+                ).textContent = "0";
+
+            }
+
+
+
+            /*
+             * ==========================================================
+             * ERROR STATE
+             * ==========================================================
+             */
+
+            function showError() {
+
+                transactionsContainer.classList.add(
+                    "hidden"
+                );
+
+                emptyState.classList.add(
+                    "hidden"
+                );
+
+                errorState.classList.remove(
+                    "hidden"
+                );
+
+            }
+
+
+
+            /*
+             * ==========================================================
+             * ESCAPE HTML
+             * ==========================================================
+             *
+             * Prevents transaction text from injecting HTML.
+             */
+
+            function escapeHtml(value) {
+
+                return String(value)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+
+            }
+
+
+
+            /*
+             * ==========================================================
+             * RETRY
+             * ==========================================================
+             */
+
+            retryButton.addEventListener(
+                "click",
+                function () {
+
+                    loadTransactions();
+
+                }
+            );
+
+
+
+            /*
+             * ==========================================================
+             * INITIAL LOAD
+             * ==========================================================
+             */
+
+            updateDisplayedDate();
+
         });
+
     </script>
+
 </body>
 
 </html>

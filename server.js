@@ -15,7 +15,10 @@ const authMiddleware = require('./middlewares/authMiddleware');
 const { renderDashboard, addExpenseForm } = require('./controllers/expenseController');
 const { isPremium } = require('./middlewares/premiumMiddleware');
 const { renderEditPage } = require('./controllers/expenseController');
-const { renderReportPage } = require('./controllers/expenseController');
+const {
+    renderReportPage
+} = require('./controllers/reportController');
+const reportRoutes = require('./routes/reportRoutes');
 const app = express();
 app.set("view engine","ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -41,9 +44,38 @@ app.get('/transactions', authMiddleware, async (req, res) => {
   const user = await User.findOne({ where: { id: req.user.id } });
   res.render('transactions', { user, transactions: [] });
 });
-app.get('/reports', authMiddleware, renderReportPage);
-app.get('/leaderboard', authMiddleware, isPremium, (req, res) => {
-    res.render('leaderboard', { user: req.user });
+app.get(
+    '/reports',
+    authMiddleware,
+    isPremium,
+    renderReportPage
+);
+app.get('/leaderboard', authMiddleware, isPremium, async (req, res) => {
+
+    try {
+
+        const user = await User.findOne({
+            where: {
+                id: req.user.id
+            }
+        });
+
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        res.render('leaderboard', {
+            user
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).send("Something went wrong");
+
+    }
+
 });
 app.get('/settings', authMiddleware, async (req, res) => {
     try {
@@ -71,6 +103,7 @@ app.use("/user", userRoutes);
 app.use('/auth',authRoutes);
 app.use('/expense',expenseRoutes);
 app.use('/purchase',purchaseRoutes);
+app.use('/report', reportRoutes);
 const startSever = async() =>{
     try{
         await sequelize.sync({alter:true})

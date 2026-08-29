@@ -145,10 +145,7 @@
                 <h3 class="text-lg font-semibold text-gray-800">Recent Transactions</h3>
                 <div class="flex space-x-2">
 
-                    <button onclick="download()"
-                        class="bg-primary hover:bg-primary-dark text-white px-3 py-1 rounded-lg text-sm transition flex items-center">
-                        <i class="fas fa-print mr-2"></i> Print
-                    </button>
+   
                 </div>
             </div>
 
@@ -512,11 +509,9 @@
         }
 
         //download report
-        async function download() {
-            await fetch('/download-report', { method: "GET" });
 
+   
 
-        }
 
 
     </script>

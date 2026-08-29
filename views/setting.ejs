@@ -2,10 +2,12 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Expense Tracker - Settings</title>
+    <title>ExpenseTracker - Settings</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -13,64 +15,107 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+
         :root {
             --primary: #4f46e5;
-            --secondary: #3f37c9;
+            --primary-dark: #4338ca;
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
             --dark: #4338ca;
-            --gray: #6c757d;
         }
+
+        .modal {
+            display: none;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
     </style>
 
     <script>
+
         tailwind.config = {
+
             theme: {
+
                 extend: {
+
                     colors: {
+
                         primary: '#4f46e5',
+
                         'primary-dark': '#4338ca',
+
                         success: '#10b981',
+
                         danger: '#ef4444',
+
                         warning: '#f59e0b',
+
                         info: '#3b82f6',
-                        'premium-gold': '#D4AF37',
-                        'premium-accent': '#3d5a80'
+
+                        'premium-gold': '#D4AF37'
+
                     }
+
                 }
+
             }
+
         };
+
     </script>
+
 </head>
+
 
 <body class="bg-gray-50 min-h-screen">
 
-    <!-- Navbar -->
-    <div>
-        <%- include('partials/navbar', { user: user }) %>
-    </div>
+
+    <!-- ========================= -->
+    <!-- NAVBAR -->
+    <!-- ========================= -->
+
+    <%- include('partials/navbar', { user: user }) %>
 
 
-    <!-- Main Content -->
-    <main class="w-[80vw] mx-auto my-10">
+    <!-- ========================= -->
+    <!-- MAIN -->
+    <!-- ========================= -->
 
-        <!-- Profile Card -->
-        <div class="bg-white rounded-2xl shadow-xl p-8">
+    <main class="w-[90vw] md:w-[80vw] mx-auto my-10">
 
-            <!-- Profile Header -->
+
+        <!-- ========================= -->
+        <!-- PROFILE CARD -->
+        <!-- ========================= -->
+
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+
+
+            <!-- PROFILE HEADER -->
+
             <div class="flex flex-col items-center mb-10">
 
                 <div class="relative mb-4">
 
                     <div
+                        id="profileAvatar"
                         class="w-32 h-32 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
 
-                        <span class="text-white text-4xl font-bold">
+                        <span
+                            id="avatarInitials"
+                            class="text-white text-4xl font-bold">
+
                             <%= user.userName.substring(0, 2).toUpperCase() %>
+
                         </span>
 
                     </div>
+
 
                     <div
                         class="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-2 border-white">
@@ -78,25 +123,41 @@
 
                 </div>
 
-                <h2 class="text-2xl text-gray-800 font-bold">
+
+                <h2
+                    id="profileName"
+                    class="text-2xl text-gray-800 font-bold">
+
                     <%= user.userName %>
+
                 </h2>
 
-                <p class="text-gray-500 mt-1">
+
+                <p
+                    id="profileEmail"
+                    class="text-gray-500 mt-1">
+
                     <%= user.email %>
+
                 </p>
+
 
                 <% if (user.isPremium) { %>
 
                     <p class="text-yellow-600 font-semibold mt-2">
+
                         <i class="fas fa-crown mr-1"></i>
+
                         Premium Member
+
                     </p>
 
                 <% } else { %>
 
                     <p class="text-gray-500 mt-2">
+
                         Free Member
+
                     </p>
 
                 <% } %>
@@ -104,30 +165,54 @@
             </div>
 
 
-            <!-- Personal Information -->
+
+            <!-- ========================= -->
+            <!-- PERSONAL INFORMATION -->
+            <!-- ========================= -->
+
             <section class="mb-10">
 
-                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+
+                <h3
+                    class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+
                     <i class="fas fa-user-circle text-primary mr-2"></i>
+
                     Personal Information
+
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    <!-- Name -->
+                <div
+                    class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+                    <!-- NAME -->
+
                     <div>
 
-                        <label class="block text-gray-500 text-sm mb-2">
+                        <label
+                            class="block text-gray-500 text-sm mb-2">
+
                             Full Name
+
                         </label>
+
 
                         <div
                             class="bg-gray-100 rounded-lg px-4 py-3 flex items-center">
 
-                            <i class="fas fa-user text-primary mr-3"></i>
+                            <i
+                                class="fas fa-user text-primary mr-3">
+                            </i>
 
-                            <span class="text-gray-800">
+
+                            <span
+                                id="infoName"
+                                class="text-gray-800">
+
                                 <%= user.userName %>
+
                             </span>
 
                         </div>
@@ -135,20 +220,32 @@
                     </div>
 
 
-                    <!-- Email -->
+                    <!-- EMAIL -->
+
                     <div>
 
-                        <label class="block text-gray-500 text-sm mb-2">
+                        <label
+                            class="block text-gray-500 text-sm mb-2">
+
                             Email Address
+
                         </label>
+
 
                         <div
                             class="bg-gray-100 rounded-lg px-4 py-3 flex items-center">
 
-                            <i class="fas fa-envelope text-primary mr-3"></i>
+                            <i
+                                class="fas fa-envelope text-primary mr-3">
+                            </i>
 
-                            <span class="text-gray-800">
+
+                            <span
+                                id="infoEmail"
+                                class="text-gray-800">
+
                                 <%= user.email %>
+
                             </span>
 
                         </div>
@@ -158,8 +255,12 @@
                 </div>
 
 
-                <!-- Profile Buttons -->
-                <div class="mt-6 flex flex-col md:flex-row gap-4">
+
+                <!-- BUTTONS -->
+
+                <div
+                    class="mt-6 flex flex-col md:flex-row gap-4">
+
 
                     <button
                         type="button"
@@ -167,6 +268,7 @@
                         class="bg-primary hover:bg-primary-dark text-white px-4 py-3 rounded-lg transition flex-1">
 
                         <i class="fas fa-edit mr-2"></i>
+
                         Edit Profile
 
                     </button>
@@ -178,6 +280,7 @@
                         class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg transition flex-1">
 
                         <i class="fas fa-share-alt mr-2"></i>
+
                         Share Profile
 
                     </button>
@@ -187,71 +290,166 @@
             </section>
 
 
-            <!-- Financial Overview -->
-            <section>
 
-                <h3 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+            <!-- ========================= -->
+            <!-- FINANCIAL OVERVIEW -->
+            <!-- ========================= -->
+
+            <section class="mb-10">
+
+
+                <h3
+                    class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+
                     <i class="fas fa-chart-pie text-primary mr-2"></i>
+
                     Financial Overview
+
                 </h3>
 
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div
+                    class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                    <!-- Total Expense -->
+
+                    <!-- EXPENSE -->
+
                     <div
                         class="bg-gradient-to-br from-indigo-600 to-indigo-900 rounded-xl p-5 text-center shadow-lg text-white">
 
                         <div class="text-3xl font-bold mb-2">
-                            ₹<%= Number(user.totalExpense || 0).toLocaleString() %>
+
+                            ₹<%= Number(user.totalExpense || 0).toLocaleString('en-IN') %>
+
                         </div>
 
+
                         <div class="text-gray-200">
+
                             Total Expense
+
                         </div>
 
                     </div>
 
 
-                    <!-- Total Income -->
+
+                    <!-- INCOME -->
+
                     <div
                         class="bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-xl p-5 text-center shadow-lg text-white">
 
                         <div class="text-3xl font-bold mb-2">
-                            ₹<%= Number(user.totalIncome || 0).toLocaleString() %>
+
+                            ₹<%= Number(user.totalIncome || 0).toLocaleString('en-IN') %>
+
                         </div>
 
+
                         <div class="text-gray-200">
+
                             Total Income
+
                         </div>
 
                     </div>
 
 
-                    <!-- Savings Rate -->
+
+                    <!-- SAVINGS -->
+
                     <div
                         class="bg-gradient-to-br from-green-600 to-green-800 rounded-xl p-5 text-center shadow-lg text-white">
 
+
                         <%
+
                             const income = Number(user.totalIncome || 0);
+
                             const expense = Number(user.totalExpense || 0);
 
                             let savingsRate = 0;
 
                             if (income > 0) {
-                                savingsRate = ((income - expense) / income) * 100;
+
+                                savingsRate =
+                                    ((income - expense) / income) * 100;
+
                             }
+
                         %>
 
+
                         <div class="text-3xl font-bold mb-2">
+
                             <%= savingsRate.toFixed(2) %>%
+
                         </div>
 
+
                         <div class="text-gray-200">
+
                             Savings Rate
+
                         </div>
 
                     </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ========================= -->
+            <!-- ACCOUNT -->
+            <!-- ========================= -->
+
+            <section>
+
+
+                <h3
+                    class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+
+                    <i class="fas fa-user-cog text-primary mr-2"></i>
+
+                    Account
+
+                </h3>
+
+
+                <div
+                    class="border border-gray-200 rounded-xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+
+                    <div>
+
+                        <h4 class="font-semibold text-gray-800">
+
+                            Logout
+
+                        </h4>
+
+
+                        <p class="text-sm text-gray-500 mt-1">
+
+                            Sign out of your ExpenseTracker account.
+
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="logoutBtn"
+                        class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition">
+
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+
+                        Logout
+
+                    </button>
 
                 </div>
 
@@ -262,57 +460,360 @@
     </main>
 
 
-    <!-- Footer -->
+
+    <!-- ========================= -->
+    <!-- EDIT PROFILE MODAL -->
+    <!-- ========================= -->
+
+    <div
+        id="editModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 px-4">
+
+
+        <div
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+
+
+            <div
+                class="flex items-center justify-between mb-6">
+
+                <h2
+                    class="text-xl font-bold text-gray-800">
+
+                    Edit Profile
+
+                </h2>
+
+
+                <button
+                    type="button"
+                    id="closeEditModal"
+                    class="text-gray-400 hover:text-gray-700 text-xl">
+
+                    <i class="fas fa-times"></i>
+
+                </button>
+
+            </div>
+
+
+
+            <form id="editProfileForm">
+
+
+                <!-- NAME -->
+
+                <div class="mb-5">
+
+                    <label
+                        class="block text-sm font-medium text-gray-600 mb-2">
+
+                        Full Name
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="editName"
+                        name="userName"
+                        value="<%= user.userName %>"
+                        required
+                        minlength="2"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                </div>
+
+
+
+                <!-- EMAIL -->
+
+                <div class="mb-6">
+
+                    <label
+                        class="block text-sm font-medium text-gray-600 mb-2">
+
+                        Email Address
+
+                    </label>
+
+
+                    <input
+                        type="email"
+                        id="editEmail"
+                        name="email"
+                        value="<%= user.email %>"
+                        required
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                </div>
+
+
+
+                <div
+                    id="editError"
+                    class="hidden bg-red-100 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                </div>
+
+
+
+                <div
+                    class="flex gap-3">
+
+
+                    <button
+                        type="button"
+                        id="cancelEdit"
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-lg">
+
+                        Cancel
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        id="saveProfileBtn"
+                        class="flex-1 bg-primary hover:bg-primary-dark text-white px-4 py-3 rounded-lg">
+
+                        Save Changes
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================= -->
+    <!-- LOGOUT MODAL -->
+    <!-- ========================= -->
+
+    <div
+        id="logoutModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 px-4">
+
+
+        <div
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center">
+
+
+            <div
+                class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+
+                <i class="fas fa-sign-out-alt text-2xl"></i>
+
+            </div>
+
+
+            <h2
+                class="text-xl font-bold text-gray-800">
+
+                Logout?
+
+            </h2>
+
+
+            <p
+                class="text-gray-500 mt-2 mb-6">
+
+                Are you sure you want to logout?
+
+            </p>
+
+
+            <div class="flex gap-3">
+
+
+                <button
+                    type="button"
+                    id="cancelLogout"
+                    class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-lg">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="confirmLogout"
+                    class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg">
+
+                    Logout
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================= -->
+    <!-- SHARE MODAL -->
+    <!-- ========================= -->
+
+    <div
+        id="shareModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 px-4">
+
+
+        <div
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+
+
+            <div
+                class="flex items-center justify-between mb-6">
+
+                <h2
+                    class="text-xl font-bold text-gray-800">
+
+                    Share Profile
+
+                </h2>
+
+
+                <button
+                    type="button"
+                    id="closeShareModal"
+                    class="text-gray-400 hover:text-gray-700 text-xl">
+
+                    <i class="fas fa-times"></i>
+
+                </button>
+
+            </div>
+
+
+            <p class="text-gray-500 mb-4">
+
+                Share your ExpenseTracker profile with others.
+
+            </p>
+
+
+            <div
+                class="flex gap-2">
+
+
+                <input
+                    type="text"
+                    id="profileLink"
+                    readonly
+                    class="flex-1 bg-gray-100 border border-gray-300 rounded-lg px-3 py-3 text-sm">
+
+
+                <button
+                    type="button"
+                    id="copyProfileLink"
+                    class="bg-primary hover:bg-primary-dark text-white px-4 rounded-lg">
+
+                    <i class="fas fa-copy"></i>
+
+                </button>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="nativeShareBtn"
+                class="hidden w-full mt-4 bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg">
+
+                <i class="fas fa-share-alt mr-2"></i>
+
+                Share
+
+            </button>
+
+
+            <p
+                id="shareMessage"
+                class="text-green-600 text-sm mt-4 text-center hidden">
+
+                Profile link copied!
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================= -->
+    <!-- FOOTER -->
+    <!-- ========================= -->
+
     <footer class="bg-gray-800 text-white mt-12">
+
 
         <div class="container mx-auto px-4 py-8">
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
 
-                <!-- About -->
+            <div
+                class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+
                 <div>
 
                     <h3 class="text-lg font-semibold mb-4">
+
                         ExpenseTracker
+
                     </h3>
 
+
                     <p class="text-gray-400">
+
                         Take control of your finances with our intuitive
                         expense tracking app.
+
                     </p>
 
                 </div>
 
 
-                <!-- Quick Links -->
+
                 <div>
 
-                    <h4 class="text-md font-semibold mb-4">
+                    <h4 class="font-semibold mb-4">
+
                         Quick Links
+
                     </h4>
+
 
                     <ul class="space-y-2 text-gray-400">
 
                         <li>
-                            <a href="/" class="hover:text-white transition">
+                            <a href="/" class="hover:text-white">
                                 Dashboard
                             </a>
                         </li>
 
                         <li>
-                            <a href="/transactions" class="hover:text-white transition">
+                            <a href="/transactions" class="hover:text-white">
                                 Transactions
                             </a>
                         </li>
 
                         <li>
-                            <a href="/dayWise" class="hover:text-white transition">
+                            <a href="/dayWise" class="hover:text-white">
                                 Daily
                             </a>
                         </li>
 
                         <li>
-                            <a href="/reports" class="hover:text-white transition">
+                            <a href="/reports" class="hover:text-white">
                                 Reports
                             </a>
                         </li>
@@ -322,35 +823,38 @@
                 </div>
 
 
-                <!-- Resources -->
+
                 <div>
 
-                    <h4 class="text-md font-semibold mb-4">
+                    <h4 class="font-semibold mb-4">
+
                         Resources
+
                     </h4>
+
 
                     <ul class="space-y-2 text-gray-400">
 
                         <li>
-                            <a href="#" class="hover:text-white transition">
+                            <a href="#" class="hover:text-white">
                                 Help Center
                             </a>
                         </li>
 
                         <li>
-                            <a href="#" class="hover:text-white transition">
+                            <a href="#" class="hover:text-white">
                                 Financial Tips
                             </a>
                         </li>
 
                         <li>
-                            <a href="#" class="hover:text-white transition">
+                            <a href="#" class="hover:text-white">
                                 Privacy Policy
                             </a>
                         </li>
 
                         <li>
-                            <a href="#" class="hover:text-white transition">
+                            <a href="#" class="hover:text-white">
                                 Terms of Service
                             </a>
                         </li>
@@ -360,20 +864,24 @@
                 </div>
 
 
-                <!-- App -->
+
                 <div>
 
-                    <h4 class="text-md font-semibold mb-4">
+                    <h4 class="font-semibold mb-4">
+
                         Get the App
+
                     </h4>
+
 
                     <div class="flex flex-col space-y-2">
 
                         <button
                             type="button"
-                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center">
+                            class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">
 
                             <i class="fab fa-apple mr-2"></i>
+
                             App Store
 
                         </button>
@@ -381,9 +889,10 @@
 
                         <button
                             type="button"
-                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center">
+                            class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">
 
                             <i class="fab fa-google-play mr-2"></i>
+
                             Google Play
 
                         </button>
@@ -395,11 +904,10 @@
             </div>
 
 
-            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+            <div
+                class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
 
-                <p>
-                    &copy; 2023 ExpenseTracker. All rights reserved.
-                </p>
+                &copy; 2023 ExpenseTracker. All rights reserved.
 
             </div>
 
@@ -408,42 +916,467 @@
     </footer>
 
 
-    <!-- Small temporary JS -->
+
+    <!-- ========================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================= -->
+
     <script>
 
-        // Edit Profile
-        document.getElementById("editProfileBtn").addEventListener("click", () => {
-            alert("Edit Profile will be implemented next.");
-        });
+
+        // ==========================================
+        // ELEMENTS
+        // ==========================================
+
+        const editModal =
+            document.getElementById("editModal");
+
+        const shareModal =
+            document.getElementById("shareModal");
+
+        const logoutModal =
+            document.getElementById("logoutModal");
 
 
-        // Share Profile
-        document.getElementById("shareProfileBtn").addEventListener("click", async () => {
 
-            if (navigator.share) {
+        // ==========================================
+        // EDIT PROFILE
+        // ==========================================
+
+        document
+            .getElementById("editProfileBtn")
+            .addEventListener("click", () => {
+
+                editModal.classList.add("active");
+
+            });
+
+
+        document
+            .getElementById("closeEditModal")
+            .addEventListener("click", () => {
+
+                editModal.classList.remove("active");
+
+            });
+
+
+        document
+            .getElementById("cancelEdit")
+            .addEventListener("click", () => {
+
+                editModal.classList.remove("active");
+
+            });
+
+
+
+        // ==========================================
+        // SAVE PROFILE
+        // ==========================================
+
+        document
+            .getElementById("editProfileForm")
+            .addEventListener("submit", async (e) => {
+
+                e.preventDefault();
+
+
+                const saveBtn =
+                    document.getElementById("saveProfileBtn");
+
+                const errorBox =
+                    document.getElementById("editError");
+
+
+                const userName =
+                    document
+                        .getElementById("editName")
+                        .value
+                        .trim();
+
+
+                const email =
+                    document
+                        .getElementById("editEmail")
+                        .value
+                        .trim();
+
+
+                errorBox.classList.add("hidden");
+
+
+                if (userName.length < 2) {
+
+                    errorBox.textContent =
+                        "Name must contain at least 2 characters.";
+
+                    errorBox.classList.remove("hidden");
+
+                    return;
+
+                }
+
+
+                saveBtn.disabled = true;
+
+                saveBtn.textContent = "Saving...";
+
+
+                try {
+
+                    const response =
+                        await fetch("/user/profile", {
+
+                            method: "PUT",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body: JSON.stringify({
+
+                                userName,
+                                email
+
+                            })
+
+                        });
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.message ||
+                            "Failed to update profile"
+                        );
+
+                    }
+
+
+                    // Update UI immediately
+
+                    document
+                        .getElementById("profileName")
+                        .textContent = data.user.userName;
+
+
+                    document
+                        .getElementById("profileEmail")
+                        .textContent = data.user.email;
+
+
+                    document
+                        .getElementById("infoName")
+                        .textContent = data.user.userName;
+
+
+                    document
+                        .getElementById("infoEmail")
+                        .textContent = data.user.email;
+
+
+                    // Update avatar initials
+
+                    document
+                        .getElementById("avatarInitials")
+                        .textContent =
+                        data.user.userName
+                            .substring(0, 2)
+                            .toUpperCase();
+
+
+                    editModal.classList.remove("active");
+
+
+                    alert("Profile updated successfully.");
+
+
+                } catch (error) {
+
+                    errorBox.textContent =
+                        error.message;
+
+                    errorBox.classList.remove("hidden");
+
+                } finally {
+
+                    saveBtn.disabled = false;
+
+                    saveBtn.textContent =
+                        "Save Changes";
+
+                }
+
+            });
+
+
+
+        // ==========================================
+        // SHARE PROFILE
+        // ==========================================
+
+        document
+            .getElementById("shareProfileBtn")
+            .addEventListener("click", async () => {
+
+
+                const profileUrl =
+                    window.location.origin +
+                    "/user/profile/<%= user.id %>";
+
+
+                document
+                    .getElementById("profileLink")
+                    .value = profileUrl;
+
+
+                shareModal.classList.add("active");
+
+
+                const nativeShareBtn =
+                    document.getElementById("nativeShareBtn");
+
+
+                if (navigator.share) {
+
+                    nativeShareBtn.classList.remove("hidden");
+
+                } else {
+
+                    nativeShareBtn.classList.add("hidden");
+
+                }
+
+            });
+
+
+
+        // ==========================================
+        // NATIVE SHARE
+        // ==========================================
+
+        document
+            .getElementById("nativeShareBtn")
+            .addEventListener("click", async () => {
+
+                const profileUrl =
+                    document.getElementById("profileLink").value;
+
 
                 try {
 
                     await navigator.share({
-                        title: "ExpenseTracker Profile",
-                        text: "<%= user.userName %>'s ExpenseTracker profile"
+
+                        title:
+                            "<%= user.userName %>'s ExpenseTracker Profile",
+
+                        text:
+                            "Check out my ExpenseTracker profile.",
+
+                        url:
+                            profileUrl
+
                     });
 
-                } catch (err) {
+                } catch (error) {
 
-                    console.log("Share cancelled");
+                    console.log("Share cancelled.");
 
                 }
 
-            } else {
+            });
 
-                alert("Sharing is not supported on this browser.");
+
+
+        // ==========================================
+        // COPY PROFILE LINK
+        // ==========================================
+
+        document
+            .getElementById("copyProfileLink")
+            .addEventListener("click", async () => {
+
+
+                const link =
+                    document
+                        .getElementById("profileLink")
+                        .value;
+
+
+                try {
+
+                    await navigator.clipboard.writeText(link);
+
+                    const message =
+                        document.getElementById("shareMessage");
+
+
+                    message.textContent =
+                        "Profile link copied!";
+
+
+                    message.classList.remove("hidden");
+
+
+                    setTimeout(() => {
+
+                        message.classList.add("hidden");
+
+                    }, 2500);
+
+
+                } catch (error) {
+
+                    // Fallback
+
+                    const input =
+                        document.getElementById("profileLink");
+
+                    input.select();
+
+                    document.execCommand("copy");
+
+
+                    alert("Profile link copied!");
+
+                }
+
+            });
+
+
+
+        // ==========================================
+        // CLOSE SHARE MODAL
+        // ==========================================
+
+        document
+            .getElementById("closeShareModal")
+            .addEventListener("click", () => {
+
+                shareModal.classList.remove("active");
+
+            });
+
+
+
+        // ==========================================
+        // LOGOUT
+        // ==========================================
+
+        document
+            .getElementById("logoutBtn")
+            .addEventListener("click", () => {
+
+                logoutModal.classList.add("active");
+
+            });
+
+
+        document
+            .getElementById("cancelLogout")
+            .addEventListener("click", () => {
+
+                logoutModal.classList.remove("active");
+
+            });
+
+
+
+        // ==========================================
+        // CONFIRM LOGOUT
+        // ==========================================
+
+        document
+            .getElementById("confirmLogout")
+            .addEventListener("click", async () => {
+
+
+                const button =
+                    document.getElementById("confirmLogout");
+
+
+                button.disabled = true;
+
+                button.textContent = "Logging out...";
+
+
+                try {
+
+                    const response =
+                        await fetch("/auth/logout", {
+
+                            method: "POST"
+
+                        });
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Logout failed"
+                        );
+
+                    }
+
+
+                    window.location.href = "/login";
+
+
+                } catch (error) {
+
+                    alert(
+                        "Unable to logout. Please try again."
+                    );
+
+
+                    button.disabled = false;
+
+                    button.textContent = "Logout";
+
+                }
+
+            });
+
+
+
+        // ==========================================
+        // CLOSE MODALS WHEN CLICKING OUTSIDE
+        // ==========================================
+
+        window.addEventListener("click", (event) => {
+
+            if (event.target === editModal) {
+
+                editModal.classList.remove("active");
+
+            }
+
+
+            if (event.target === shareModal) {
+
+                shareModal.classList.remove("active");
+
+            }
+
+
+            if (event.target === logoutModal) {
+
+                logoutModal.classList.remove("active");
 
             }
 
         });
 
     </script>
+
 
 </body>
 

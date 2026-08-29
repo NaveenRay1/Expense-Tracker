@@ -1,33 +1,43 @@
-
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker - Leaderboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .active-filter {
-            background-color: #4f46e5;
-            color: white;
-        }
 
+    <title>Expense Tracker - Leaderboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
         :root {
             --primary: #4f46e5;
             --secondary: #3f37c9;
-            --success: #4cc9f0;
-            --danger: #f72585;
-            --warning: #f8961e;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
             --light: #f8f9fa;
             --dark: #4338ca;
             --gray: #6c757d;
-            --light: #e9ecef;
+        }
+
+        .rank-gold {
+            background-color: #ffd700;
+        }
+
+        .rank-silver {
+            background-color: #c0c0c0;
+        }
+
+        .rank-bronze {
+            background-color: #cd7f32;
         }
     </style>
-    <script>
 
+    <script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -44,388 +54,1328 @@
                     }
                 }
             }
-        }
+        };
     </script>
 </head>
 
+
 <body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
+
+    <!-- Navbar -->
     <div>
-        <%- include('partials/navbar',{user:user}) %>
+        <%- include('partials/navbar', { user: user }) %>
     </div>
+
 
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
+
         <!-- Page Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">Savings Leaderboard</h2>
-                <p class="text-gray-600">Compare your financial progress with other users</p>
-            </div>
-            <div class="mt-4 md:mt-0 flex items-center space-x-3">
-                <div class="relative">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                    <input type="text" id="search-input" placeholder="Search users..."
-                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-64">
-                </div>
-                <button id="refresh-btn"
-                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition flex items-center">
-                    <i class="fas fa-redo-alt mr-2"></i> Refresh
-                </button>
-            </div>
-        </div>
 
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">
+                    Savings Leaderboard
+                </h2>
+
+                <p class="text-gray-600">
+                    Compare your financial progress with other users
+                </p>
+            </div>
+
+
+            <!-- Search + Refresh -->
+            <div class="mt-4 md:mt-0 flex items-center space-x-3">
+
+                <div class="relative">
+
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Search users..."
+                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg
+                               focus:outline-none focus:ring-2 focus:ring-primary
+                               focus:border-transparent w-64">
+
+                </div>
+
+
+                <button
+                    id="refresh-btn"
+                    type="button"
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-700
+                           px-4 py-2 rounded-lg transition flex items-center">
+
+                    <i class="fas fa-redo-alt mr-2"></i>
+
+                    Refresh
+
+                </button>
+
+            </div>
+
+        </div>
 
 
         <!-- Leaderboard Table -->
         <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-semibold text-gray-800">Top Savers Leaderboard</h3>
-                <div class="flex items-center space-x-4">
 
+            <div class="px-6 py-4 border-b border-gray-200">
 
-                </div>
+                <h3 class="text-lg font-semibold text-gray-800">
+                    Top Savers Leaderboard
+                </h3>
+
             </div>
+
 
             <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Rank</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                User</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Savings Rate</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Yearly Income</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Yearly Expenses</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Savings</th>
 
+                <table class="w-full">
+
+                    <thead class="bg-gray-50">
+
+                        <tr>
+
+                            <th class="px-6 py-3 text-left text-xs font-medium
+                                       text-gray-500 uppercase tracking-wider">
+                                Rank
+                            </th>
+
+                            <th class="px-6 py-3 text-left text-xs font-medium
+                                       text-gray-500 uppercase tracking-wider">
+                                User
+                            </th>
+
+                            <th class="px-6 py-3 text-left text-xs font-medium
+                                       text-gray-500 uppercase tracking-wider">
+                                Savings Rate
+                            </th>
+
+                            <th class="px-6 py-3 text-left text-xs font-medium
+                                       text-gray-500 uppercase tracking-wider">
+                                Yearly Income
+                            </th>
+
+                            <th class="px-6 py-3 text-left text-xs font-medium
+                                       text-gray-500 uppercase tracking-wider">
+                                Yearly Expenses
+                            </th>
+
+                            <th class="px-6 py-3 text-left text-xs font-medium
+                                       text-gray-500 uppercase tracking-wider">
+                                Savings
+                            </th>
 
                         </tr>
+
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="leaderboard-body">
-                        <!-- Data will be populated by JavaScript -->
+
+
+                    <tbody
+                        id="leaderboard-body"
+                        class="bg-white divide-y divide-gray-200">
+
+                        <!-- JavaScript will populate this -->
+
                     </tbody>
+
                 </table>
+
             </div>
+
 
             <!-- Pagination -->
-            <div class="px-6 py-4 border-t border-gray-200 flex flex-col md:flex-row items-center justify-between">
+            <div class="px-6 py-4 border-t border-gray-200
+                        flex flex-col md:flex-row items-center justify-between">
+
                 <div class="text-sm text-gray-700 mb-4 md:mb-0">
-                    Showing <span id="pageNumber">1</span> to <span id="totalPages">10</span> of <span
-                        id="total_length">127</span> results
+
+                    Showing
+                    <span id="pageNumber">0</span>
+
+                    to
+                    <span id="totalPages">0</span>
+
+                    of
+                    <span id="total_length">0</span>
+
+                    results
+
                 </div>
-                <div id="pages" class="flex items-center space-x-2">
 
 
-
-
-
+                <div
+                    id="pages"
+                    class="flex items-center space-x-2 mb-4 md:mb-0">
                 </div>
-                <div class="mt-4 md:mt-0 flex items-center space-x-2">
-                    <span class="text-sm text-gray-700">Rows per page:</span>
-                    <select id="page-size"
-                        class="border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary">
-                        <option value="1">1</option>
+
+
+                <div class="flex items-center space-x-2">
+
+                    <span class="text-sm text-gray-700">
+                        Rows per page:
+                    </span>
+
+                    <select
+                        id="page-size"
+                        class="border border-gray-300 rounded-lg px-2 py-1
+                               focus:outline-none focus:ring-1 focus:ring-primary">
+
+                        <option value="10">10</option>
                         <option value="20" selected>20</option>
                         <option value="50">50</option>
+
                     </select>
+
                 </div>
+
             </div>
+
         </div>
+
 
         <!-- Your Ranking Card -->
-        <div class="bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl shadow-sm p-6">
-            <div class="flex flex-col md:flex-row justify-between items-center">
+        <div
+            class="bg-gradient-to-r from-primary to-primary-dark
+                   text-white rounded-xl shadow-sm p-6">
+
+            <div
+                class="flex flex-col md:flex-row
+                       justify-between items-center">
+
+
+                <!-- Rank -->
                 <div class="flex items-center mb-4 md:mb-0">
-                    <div id="myRank" class="text-3xl font-bold mr-4">#2</div>
-                    <div>
-                        <h3 class="text-xl font-bold">Your Current Ranking</h3>
+
+                    <div
+                        id="myRank"
+                        class="text-3xl font-bold mr-4">
+
+                        #-
 
                     </div>
+
+                    <div>
+
+                        <h3 class="text-xl font-bold">
+                            Your Current Ranking
+                        </h3>
+
+                    </div>
+
                 </div>
+
+
+                <!-- Stats -->
                 <div class="flex items-center space-x-4">
+
+
+                    <!-- Savings Rate -->
                     <div class="text-center">
-                        <div id="mySavingRate" class="text-2xl font-bold">38%</div>
-                        <div class="text-primary-100 text-sm">Savings Rate</div>
+
+                        <div
+                            id="mySavingRate"
+                            class="text-2xl font-bold">
+
+                            0%
+
+                        </div>
+
+                        <div class="text-sm">
+                            Savings Rate
+                        </div>
+
                     </div>
+
+
                     <div class="h-10 w-px bg-white bg-opacity-30"></div>
+
+
+                    <!-- Income -->
                     <div class="text-center">
-                        <div id="myIncome" class="text-2xl font-bold"></div>
-                        <div class="text-primary-100 text-sm">TotalIcome</div>
+
+                        <div
+                            id="myIncome"
+                            class="text-2xl font-bold">
+
+                            ₹0
+
+                        </div>
+
+                        <div class="text-sm">
+                            Total Income
+                        </div>
+
                     </div>
+
+
                     <div class="h-10 w-px bg-white bg-opacity-30"></div>
+
+
+                    <!-- Expense -->
                     <div class="text-center">
-                        <div id="myExpense" class="text-2xl font-bold">12</div>
-                        <div class="text-primary-100 text-sm">TotalExpense</div>
+
+                        <div
+                            id="myExpense"
+                            class="text-2xl font-bold">
+
+                            ₹0
+
+                        </div>
+
+                        <div class="text-sm">
+                            Total Expense
+                        </div>
+
                     </div>
+
                 </div>
+
             </div>
 
         </div>
+
     </div>
+
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white mt-12">
+
         <div class="container mx-auto px-4 py-8">
+
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+
+                <!-- About -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">ExpenseTracker</h3>
-                    <p class="text-gray-400">Take control of your finances with our intuitive expense tracking app.</p>
+
+                    <h3 class="text-lg font-semibold mb-4">
+                        ExpenseTracker
+                    </h3>
+
+                    <p class="text-gray-400">
+                        Take control of your finances with our intuitive
+                        expense tracking app.
+                    </p>
+
                 </div>
+
+
+                <!-- Quick Links -->
                 <div>
-                    <h4 class="text-md font-semibold mb-4">Quick Links</h4>
+
+                    <h4 class="text-md font-semibold mb-4">
+                        Quick Links
+                    </h4>
+
                     <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">Dashboard</a></li>
-                        <li><a href="#" class="hover:text-white transition">Transactions</a></li>
-                        <li><a href="#" class="hover:text-white transition">Budgets</a></li>
-                        <li><a href="#" class="hover:text-white transition">Reports</a></li>
+
+                        <li>
+                            <a
+                                href="/"
+                                class="hover:text-white transition">
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                href="/transactions"
+                                class="hover:text-white transition">
+                                Transactions
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                href="/dayWise"
+                                class="hover:text-white transition">
+                                Daily
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                href="/reports"
+                                class="hover:text-white transition">
+                                Reports
+                            </a>
+                        </li>
+
                     </ul>
+
                 </div>
+
+
+                <!-- Resources -->
                 <div>
-                    <h4 class="text-md font-semibold mb-4">Resources</h4>
+
+                    <h4 class="text-md font-semibold mb-4">
+                        Resources
+                    </h4>
+
                     <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">Help Center</a></li>
-                        <li><a href="#" class="hover:text-white transition">Financial Tips</a></li>
-                        <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+
+                        <li>
+                            <a href="#" class="hover:text-white transition">
+                                Help Center
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#" class="hover:text-white transition">
+                                Financial Tips
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#" class="hover:text-white transition">
+                                Privacy Policy
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#" class="hover:text-white transition">
+                                Terms of Service
+                            </a>
+                        </li>
+
                     </ul>
+
                 </div>
+
+
+                <!-- App -->
                 <div>
-                    <h4 class="text-md font-semibold mb-4">Get the App</h4>
+
+                    <h4 class="text-md font-semibold mb-4">
+                        Get the App
+                    </h4>
+
                     <div class="flex flex-col space-y-2">
+
                         <button
-                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center">
-                            <i class="fab fa-apple mr-2"></i> App Store
+                            type="button"
+                            class="bg-gray-700 hover:bg-gray-600
+                                   text-white px-4 py-2 rounded-lg
+                                   transition flex items-center justify-center">
+
+                            <i class="fab fa-apple mr-2"></i>
+
+                            App Store
+
                         </button>
+
+
                         <button
-                            class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center justify-center">
-                            <i class="fab fa-google-play mr-2"></i> Google Play
+                            type="button"
+                            class="bg-gray-700 hover:bg-gray-600
+                                   text-white px-4 py-2 rounded-lg
+                                   transition flex items-center justify-center">
+
+                            <i class="fab fa-google-play mr-2"></i>
+
+                            Google Play
+
                         </button>
+
                     </div>
+
                 </div>
+
             </div>
-            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
-                <p>&copy; 2023 ExpenseTracker. All rights reserved.</p>
+
+
+            <div
+                class="border-t border-gray-700 mt-8 pt-6
+                       text-center text-gray-400">
+
+                <p>
+                    &copy; 2023 ExpenseTracker. All rights reserved.
+                </p>
+
             </div>
+
         </div>
+
     </footer>
 
+
+    <!-- Leaderboard JavaScript -->
     <script>
 
-        // DOM elements
-        const leaderboardBody = document.getElementById('leaderboard-body');
-        const paginationNumbers = document.getElementById('pagination-numbers');
-        const pageStart = document.getElementById('page-start');
-        const pageEnd = document.getElementById('page-end');
-        const totalItems = document.getElementById('total-items');
-        const searchInput = document.getElementById('search-input');
-        const periodFilter = document.getElementById('period-filter');
-        const categoryFilter = document.getElementById('category-filter');
-        const regionFilter = document.getElementById('region-filter');
-        const ageFilter = document.getElementById('age-filter');
-        const pageSizeSelect = document.getElementById('page-size');
-        const prevPageBtn = document.getElementById('prev-page');
-        const nextPageBtn = document.getElementById('next-page');
-        const firstPageBtn = document.getElementById('first-page');
-        const lastPageBtn = document.getElementById('last-page');
-        const refreshBtn = document.getElementById('refresh-btn');
+        const leaderboardBody =
+            document.getElementById("leaderboard-body");
+
+        const searchInput =
+            document.getElementById("search-input");
+
+        const refreshBtn =
+            document.getElementById("refresh-btn");
+
+        const pageSizeSelect =
+            document.getElementById("page-size");
+
+        const pagesContainer =
+            document.getElementById("pages");
 
 
-        // Initialize the leaderboard
         let currentPage = 1;
-        document.addEventListener('DOMContentLoaded', function () {
-            const select = document.getElementById('page-size');
 
-            //  Restore saved value
-            const savedValue = localStorage.getItem('pageSize');
-            if (savedValue) {
-                select.value = savedValue;
+        let pageLimit = 20;
+
+        let currentUsers = [];
+
+        let totalUsers = 0;
+
+
+        // --------------------------------------------------
+        // Format currency
+        // --------------------------------------------------
+
+        function formatCurrency(amount) {
+
+            return Number(amount || 0).toLocaleString("en-IN");
+
+        }
+
+
+        // --------------------------------------------------
+        // Calculate savings
+        // --------------------------------------------------
+
+        function calculateSavings(user) {
+
+            return Number(user.totalIncome || 0) -
+                   Number(user.totalExpense || 0);
+
+        }
+
+
+        // --------------------------------------------------
+        // Calculate savings rate
+        // --------------------------------------------------
+
+        function calculateSavingsRate(user) {
+
+            const income = Number(user.totalIncome || 0);
+
+            const expense = Number(user.totalExpense || 0);
+
+            if (income <= 0) {
+                return 0;
             }
 
-            // Get value (now reflects user's last choice)
-            const pageLimit = parseInt(select.value) || 1;
-            console.log("Page Limit:", pageLimit);
+            return ((income - expense) / income) * 100;
 
-            // Save new value whenever user changes it
-            select.addEventListener('change', function () {
-                localStorage.setItem('pageSize', select.value);
-                
-                location.reload();
-            });
-            
-          
-            renderLeaderboard([currentPage, pageLimit]);
+        }
 
 
-        });
+        // --------------------------------------------------
+        // Create rank badge
+        // --------------------------------------------------
 
-        // Render leaderboard table
-        async function renderLeaderboard(page = [1, pageLimit]) {
-            leaderboardBody.innerHTML = '';
-            currentPage = page[0];
-            pageLimit = page[1];
-            console.log(pageLimit)
-            let res = await fetch('/leaderboard/data', {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ page }),
-            });
-            res = await res.json();
+        function createRankBadge(rank) {
 
-            res.users.forEach((user, index) => {
-                const globalRank = (res.startRank) + index + 1;
-                let savingsRate = 0;
-                if (user.totalIncome > 0) {
-                    savingsRate = ((user.totalIncome - user.totalExpense) / user.totalIncome) * 100;
-                }
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50 transition';
-                let rankBadge = '';
-                if (globalRank === 1) {
-                    rankBadge = `<div class="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-white font-bold">1</div>`;
-                } else if (globalRank === 2) {
-                    rankBadge = `<div class="w-8 h-8 rounded-full bg-silver flex items-center justify-center text-white font-bold">2</div>`;
-                } else if (globalRank === 3) {
-                    rankBadge = `<div class="w-8 h-8 rounded-full bg-bronze flex items-center justify-center text-white font-bold">3</div>`;
-                } else {
-                    rankBadge = `<div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold">${globalRank}</div>`;
-                }
+            let className =
+                "w-8 h-8 rounded-full flex items-center " +
+                "justify-center text-white font-bold";
+
+            if (rank === 1) {
+
+                className += " rank-gold";
+
+            } else if (rank === 2) {
+
+                className += " rank-silver";
+
+            } else if (rank === 3) {
+
+                className += " rank-bronze";
+
+            } else {
+
+                className +=
+                    " bg-gray-200 text-gray-700";
+
+            }
+
+            return `
+                <div class="${className}">
+                    ${rank}
+                </div>
+            `;
+
+        }
+
+
+        // --------------------------------------------------
+        // Render table
+        // --------------------------------------------------
+
+        function renderTable(users, startRank) {
+
+            leaderboardBody.innerHTML = "";
+
+
+            if (!users || users.length === 0) {
+
+                leaderboardBody.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="6"
+                            class="px-6 py-10 text-center text-gray-500">
+
+                            No users found.
+
+                        </td>
+                    </tr>
+                `;
+
+                return;
+
+            }
+
+
+            users.forEach((user, index) => {
+
+                const globalRank =
+                    Number(startRank || 0) + index + 1;
+
+
+                const savingsRate =
+                    calculateSavingsRate(user);
+
+
+                const savings =
+                    calculateSavings(user);
+
+
+                const row =
+                    document.createElement("tr");
+
+
+                row.className =
+                    "hover:bg-gray-50 transition";
 
 
                 row.innerHTML = `
+
+                    <!-- Rank -->
                     <td class="px-6 py-4 whitespace-nowrap">
-                       ${rankBadge}
+
+                        ${createRankBadge(globalRank)}
+
                     </td>
+
+
+                    <!-- User -->
                     <td class="px-6 py-4 whitespace-nowrap">
+
                         <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
-                              ${user.userName.charAt(0)}
+
+                            <div
+                                class="flex-shrink-0 h-10 w-10
+                                       bg-primary rounded-full
+                                       flex items-center justify-center
+                                       text-white font-bold">
+
+                                ${String(user.userName || "?")
+                                    .charAt(0)
+                                    .toUpperCase()}
+
                             </div>
+
+
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900">${user.userName}</div>
-                              
+
+                                <div
+                                    class="text-sm font-medium
+                                           text-gray-900">
+
+                                    ${user.userName}
+
+                                </div>
+
                             </div>
+
                         </div>
+
                     </td>
+
+
+                    <!-- Savings Rate -->
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">${savingsRate.toFixed(2)}%</div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-600 h-2 rounded-full" style="width:${savingsRate.toFixed(2)}%"></div>
+
+                        <div
+                            class="text-sm font-medium
+                                   text-gray-900">
+
+                            ${savingsRate.toFixed(2)}%
+
                         </div>
+
+
+                        <div
+                            class="w-full bg-gray-200
+                                   rounded-full h-2 mt-1">
+
+                            <div
+                                class="bg-green-600 h-2 rounded-full"
+                                style="width:${Math.min(
+                                    Math.max(savingsRate, 0),
+                                    100
+                                )}%">
+
+                            </div>
+
+                        </div>
+
                     </td>
+
+
+                    <!-- Income -->
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">₹${user.totalIncome.toLocaleString()}</div>
+
+                        <div class="text-sm text-gray-900">
+
+                            ₹${formatCurrency(user.totalIncome)}
+
+                        </div>
+
                     </td>
+
+
+                    <!-- Expense -->
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">₹${user.totalExpense.toLocaleString()}</div>
+
+                        <div class="text-sm text-gray-900">
+
+                            ₹${formatCurrency(user.totalExpense)}
+
+                        </div>
+
                     </td>
+
+
+                    <!-- Savings -->
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-success">₹${Math.max(user.totalIncome - user.totalExpense, 0)}</div>
+
+                        <div
+                            class="text-sm font-medium
+                                   ${savings >= 0
+                                       ? "text-green-600"
+                                       : "text-red-600"}">
+
+                            ₹${formatCurrency(savings)}
+
+                        </div>
+
                     </td>
-                   
-                    
+
                 `;
 
+
                 leaderboardBody.appendChild(row);
-                if (res.user.id.id.toString() === user.userId.toString()) {
-                    console.log("matchMedia")
-                    document.getElementById('myRank').innerHTML = `#${globalRank}`;
-                    document.getElementById('myIncome').innerHTML = `₹${user.totalIncome}`;
-                    document.getElementById('myExpense').innerHTML = `₹${user.totalExpense}`;
-                    document.getElementById('mySavingRate').innerHTML = `${savingsRate.toFixed(2)}%`
-
-                }
 
             });
-            let pages = document.getElementById('pages');
-            pages.innerHTML = '';
-            // console.log(res.count+"1")
-            let pageLength = Math.ceil(Number(Number(res?.count) / Number(pageLimit)));
-            const prev = document.createElement("button");
-            prev.textContent = "Prev";
-            prev.disabled = currentPage === 1;
-            prev.className = "px-3 py-1 rounded-lg bg-primary-dark text-white hover:bg-primary-dark transition";
-            prev.addEventListener("click", () => {
-                if (currentPage > 1) renderLeaderboard([currentPage - 1, pageLimit]);
-            });
-            pages.appendChild(prev);
 
-            for (let i = 0; i < pageLength; i++) {
+        }
 
-                const btn = document.createElement("button");
-                btn.textContent = i + 1;
-                btn.className = "px-3 py-1 rounded-lg bg-primary text-white hover:bg-primary-dark transition";
 
-                btn.addEventListener("click", () => {
-                    renderLeaderboard([i + 1, pageLimit]);
-                });
+        // --------------------------------------------------
+        // Update pagination text
+        // --------------------------------------------------
 
-                pages.appendChild(btn);
+        function updatePaginationText() {
+
+            if (totalUsers === 0) {
+
+                document.getElementById("pageNumber")
+                    .innerText = 0;
+
+                document.getElementById("totalPages")
+                    .innerText = 0;
+
+                document.getElementById("total_length")
+                    .innerText = 0;
+
+                return;
 
             }
-            const next = document.createElement("button");
-            next.textContent = "Next";
-            next.disabled = currentPage === pageLength;
-            next.addEventListener("click", () => {
-                if (currentPage < pageLength) renderLeaderboard([currentPage + 1, pageLimit]);
+
+
+            const start =
+                ((currentPage - 1) * pageLimit) + 1;
+
+
+            const end =
+                Math.min(
+                    currentPage * pageLimit,
+                    totalUsers
+                );
+
+
+            document.getElementById("pageNumber")
+                .innerText = start;
+
+
+            document.getElementById("totalPages")
+                .innerText = end;
+
+
+            document.getElementById("total_length")
+                .innerText = totalUsers;
+
+        }
+
+
+        // --------------------------------------------------
+        // Render pagination buttons
+        // --------------------------------------------------
+
+        function renderPagination() {
+
+            pagesContainer.innerHTML = "";
+
+
+            const totalPages =
+                Math.ceil(totalUsers / pageLimit);
+
+
+            if (totalPages <= 1) {
+
+                return;
+
+            }
+
+
+            // Previous
+            const prevButton =
+                document.createElement("button");
+
+
+            prevButton.textContent = "Prev";
+
+
+            prevButton.disabled =
+                currentPage === 1;
+
+
+            prevButton.className =
+                "px-3 py-1 rounded-lg " +
+                "bg-primary-dark text-white " +
+                "disabled:opacity-50 " +
+                "disabled:cursor-not-allowed";
+
+
+            prevButton.addEventListener("click", () => {
+
+                if (currentPage > 1) {
+
+                    currentPage--;
+
+                    loadLeaderboard();
+
+                }
+
             });
-            next.className = "px-3 py-1 rounded-lg bg-primary-dark text-white hover:bg-primary-dark transition";
-            pages.appendChild(next);
-
-            //total pages and current page
-            document.getElementById('pageNumber').innerText = (res.startRank + 1);
-            document.getElementById('totalPages').innerText = (res.startRank + pageLimit);
-            document.getElementById('total_length').innerText = Math.ceil(res?.count / pageLimit);
 
 
+            pagesContainer.appendChild(prevButton);
 
 
+            // Page numbers
+            for (
+                let page = 1;
+                page <= totalPages;
+                page++
+            ) {
+
+                const button =
+                    document.createElement("button");
+
+
+                button.textContent = page;
+
+
+                button.className =
+                    "px-3 py-1 rounded-lg " +
+                    (page === currentPage
+                        ? "bg-primary-dark text-white"
+                        : "bg-gray-100 text-gray-700");
+
+
+                button.addEventListener("click", () => {
+
+                    currentPage = page;
+
+                    loadLeaderboard();
+
+                });
+
+
+                pagesContainer.appendChild(button);
+
+            }
+
+
+            // Next
+            const nextButton =
+                document.createElement("button");
+
+
+            nextButton.textContent = "Next";
+
+
+            nextButton.disabled =
+                currentPage === totalPages;
+
+
+            nextButton.className =
+                "px-3 py-1 rounded-lg " +
+                "bg-primary-dark text-white " +
+                "disabled:opacity-50 " +
+                "disabled:cursor-not-allowed";
+
+
+            nextButton.addEventListener("click", () => {
+
+                if (currentPage < totalPages) {
+
+                    currentPage++;
+
+                    loadLeaderboard();
+
+                }
+
+            });
+
+
+            pagesContainer.appendChild(nextButton);
 
         }
 
 
-        //     // Search functionality
-        searchInput.addEventListener('input', () => {
-            applyFilters();
-        });
+        // --------------------------------------------------
+        // Update "Your Current Ranking"
+        // --------------------------------------------------
+
+        async function updateMyRanking(response) {
+
+            const currentUserId =
+                String(response.currentUserId);
 
 
+            let allUsers = response.users || [];
 
-        // // Apply all filters
-        function applyFilters() {
-            const table = document.getElementById('leaderboard-body');
-            const rows = table.children;
-            console.log(rows)
+            let myUser =
+                allUsers.find(
+                    user =>
+                        String(user.userId) === currentUserId
+                );
 
-            // Search filter
-            const searchTerm = searchInput.value.toLowerCase();
-            Array.from(rows).forEach((row) => {
-                const text = row.textContent.toLowerCase().trim();
+
+            let myRank = null;
+
+
+            // If current user is on current page
+            if (myUser) {
+
+                myRank =
+                    Number(response.startRank || 0) +
+                    allUsers.indexOf(myUser) +
+                    1;
+
+            }
+
+
+            /*
+             * The backend only gives us the users for the
+             * requested page. Therefore, if our user isn't
+             * on this page, fetch all users once so we can
+             * calculate the real rank.
+             */
+            if (!myUser && Number(response.count) > 0) {
+
+                try {
+
+                    const allResponse =
+                        await fetch(
+                            "/user/leaderboard/data",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+                                    page: [
+                                        1,
+                                        Number(response.count)
+                                    ]
+                                })
+                            }
+                        );
+
+
+                    if (allResponse.ok) {
+
+                        const allData =
+                            await allResponse.json();
+
+
+                        allUsers =
+                            allData.users || [];
+
+
+                        myUser =
+                            allUsers.find(
+                                user =>
+                                    String(user.userId) ===
+                                    currentUserId
+                            );
+
+
+                        if (myUser) {
+
+                            myRank =
+                                allUsers.indexOf(myUser) + 1;
+
+                        }
+
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "Could not calculate current rank:",
+                        error
+                    );
+
+                }
+
+            }
+
+
+            if (!myUser) {
+
+                document.getElementById("myRank")
+                    .innerText = "#-";
+
+                document.getElementById("myIncome")
+                    .innerText = "₹0";
+
+                document.getElementById("myExpense")
+                    .innerText = "₹0";
+
+                document.getElementById("mySavingRate")
+                    .innerText = "0%";
+
+                return;
+
+            }
+
+
+            const savingsRate =
+                calculateSavingsRate(myUser);
+
+
+            document.getElementById("myRank")
+                .innerText = `#${myRank}`;
+
+
+            document.getElementById("myIncome")
+                .innerText =
+                `₹${formatCurrency(myUser.totalIncome)}`;
+
+
+            document.getElementById("myExpense")
+                .innerText =
+                `₹${formatCurrency(myUser.totalExpense)}`;
+
+
+            document.getElementById("mySavingRate")
+                .innerText =
+                `${savingsRate.toFixed(2)}%`;
+
+        }
+
+
+        // --------------------------------------------------
+        // Load leaderboard
+        // --------------------------------------------------
+
+        async function loadLeaderboard() {
+
+            leaderboardBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="px-6 py-10 text-center
+                               text-gray-500">
+
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+
+                        Loading leaderboard...
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/user/leaderboard/data",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                page: [
+                                    currentPage,
+                                    pageLimit
+                                ]
+                            })
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `Request failed: ${response.status}`
+                    );
+
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                if (!Array.isArray(data.users)) {
+
+                    throw new Error(
+                        data.msg ||
+                        "Invalid leaderboard response"
+                    );
+
+                }
+
+
+                currentUsers =
+                    data.users;
+
+
+                totalUsers =
+                    Number(data.count) || 0;
+
+
+                renderTable(
+                    currentUsers,
+                    Number(data.startRank) || 0
+                );
+
+
+                updatePaginationText();
+
+                renderPagination();
+
+                await updateMyRanking(data);
+
+
+                // Re-apply search if there is text
+                applySearch();
+
+            } catch (error) {
+
+                console.error(
+                    "Leaderboard error:",
+                    error
+                );
+
+
+                leaderboardBody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="px-6 py-10
+                                   text-center text-red-500">
+
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+
+                            Failed to load leaderboard.
+
+                            <br>
+
+                            <button
+                                type="button"
+                                onclick="loadLeaderboard()"
+                                class="mt-3 px-4 py-2
+                                       bg-primary text-white
+                                       rounded-lg">
+
+                                Try Again
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        }
+
+
+        // --------------------------------------------------
+        // Search
+        // --------------------------------------------------
+
+        function applySearch() {
+
+            const searchTerm =
+                searchInput.value
+                    .trim()
+                    .toLowerCase();
+
+
+            const rows =
+                leaderboardBody.querySelectorAll("tr");
+
+
+            rows.forEach(row => {
+
+                const text =
+                    row.textContent.toLowerCase();
+
+
                 if (text.includes(searchTerm)) {
-                    row.style.display = '';
-                }
-                else {
-                    row.style.display = 'none'
+
+                    row.style.display = "";
+
+                } else {
+
+                    row.style.display = "none";
 
                 }
-            })
 
+            });
 
         }
 
+
+        searchInput.addEventListener(
+            "input",
+            applySearch
+        );
+
+
+        // --------------------------------------------------
+        // Refresh
+        // --------------------------------------------------
+
+        refreshBtn.addEventListener(
+            "click",
+            () => {
+
+                searchInput.value = "";
+
+                loadLeaderboard();
+
+            }
+        );
+
+
+        // --------------------------------------------------
+        // Page size
+        // --------------------------------------------------
+
+        pageSizeSelect.addEventListener(
+            "change",
+            () => {
+
+                pageLimit =
+                    Number(pageSizeSelect.value) || 20;
+
+                localStorage.setItem(
+                    "leaderboardPageSize",
+                    pageLimit
+                );
+
+
+                currentPage = 1;
+
+                loadLeaderboard();
+
+            }
+        );
+
+
+        // --------------------------------------------------
+        // Initial load
+        // --------------------------------------------------
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            () => {
+
+                const savedPageSize =
+                    Number(
+                        localStorage.getItem(
+                            "leaderboardPageSize"
+                        )
+                    );
+
+
+                if (
+                    savedPageSize === 10 ||
+                    savedPageSize === 20 ||
+                    savedPageSize === 50
+                ) {
+
+                    pageLimit =
+                        savedPageSize;
+
+                    pageSizeSelect.value =
+                        savedPageSize;
+
+                } else {
+
+                    pageLimit = 20;
+
+                    pageSizeSelect.value = 20;
+
+                }
+
+
+                loadLeaderboard();
+
+            }
+        );
 
     </script>
-
 
 </body>
 
 </html>
-
-

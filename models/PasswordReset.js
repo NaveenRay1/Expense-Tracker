@@ -7,7 +7,7 @@ const PasswordReset = sequelize.define('PasswordReset',{
     id:{
         type:DataTypes.INTEGER,
         primaryKey:true,
-        increament:true
+        autoIncrement:true
     },
     token:{
         type:DataTypes.STRING,

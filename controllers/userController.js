@@ -1,72 +1,47 @@
 
-const User = require('../models/User');
-const sequelize = require('../config/db');
+const User = require("../models/User");
+const sequelize = require("../config/db");
 
 
-
-const getLeaderboard = async(req,res)=>{
-
-    try{
-        //pagination 
-        const page = parseInt(req.query.page)||1;
-        const limit = parseInt(req.query.limit) || 10;
-
-        const offset = (page-1)*limit;
-
-        //now fetch
-        const result = await User.findAndCountAll({
-            attributes:[
-                "id",
-                "userName",
-                "totalExpense"
-            ],
-            order:[
-                ["totalExpense","DESC"]
-            ],
-            limit:limit,
-            offset:offset
-        });
-
-        const totalItems = result.count;
-        const totalPages = Math.ceil(totalItems/limit);
-
-        return res.status(200).json({
-            msg:"leader fetched",
-            data:result.rows,
-                
-             pagination:{
-                    page,
-                    totalItems,
-                    totalPages,
-                    limit
-                }
-            
-        });
-    }catch(err){
-        console.log(err.message);
-        return res.status(500).json({msg:err.message});
-    }
-}
+// ==========================================
+// LEADERBOARD DATA
+// ==========================================
 
 const getLeaderboardData = async (req, res) => {
     try {
         const { page = [1, 10] } = req.body;
+
         const pageNumber = Number(page[0]) || 1;
         const limit = Number(page[1]) || 10;
+
         const offset = (pageNumber - 1) * limit;
 
         const result = await User.findAndCountAll({
-            attributes: ["id", "userName", "totalIncome", "totalExpense"],
-            order: [[sequelize.literal("(totalIncome - totalExpense)"), "DESC"]],
+            attributes: [
+                "id",
+                "userName",
+                "totalIncome",
+                "totalExpense"
+            ],
+
+            order: [
+                [
+                    sequelize.literal(
+                        "(totalIncome - totalExpense)"
+                    ),
+                    "DESC"
+                ]
+            ],
+
             limit,
-            offset,
+            offset
         });
 
-        const users = result.rows.map((u) => ({
-            userId: u.id,
-            userName: u.userName,
-            totalIncome: Number(u.totalIncome),
-            totalExpense: Number(u.totalExpense),
+        const users = result.rows.map((user) => ({
+            userId: user.id,
+            userName: user.userName,
+            totalIncome: Number(user.totalIncome || 0),
+            totalExpense: Number(user.totalExpense || 0)
         }));
 
         return res.status(200).json({
@@ -74,11 +49,18 @@ const getLeaderboardData = async (req, res) => {
             users,
             currentUserId: req.user.id,
             startRank: offset,
-            count: result.count,
+            count: result.count
         });
+
     } catch (err) {
-        console.log(err.message);
-        return res.status(500).json({ msg: err.message });
+        console.error(
+            "Leaderboard error:",
+            err.message
+        );
+
+        return res.status(500).json({
+            msg: "Something went wrong while fetching leaderboard"
+        });
     }
 };
 
@@ -86,11 +68,15 @@ const getLeaderboardData = async (req, res) => {
 // ==========================================
 // UPDATE PROFILE
 // ==========================================
+
 const updateProfile = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        const { userName, email } = req.body;
+        const {
+            userName,
+            email
+        } = req.body;
 
         if (!userName || !email) {
             return res.status(400).json({
@@ -103,29 +89,18 @@ const updateProfile = async (req, res) => {
 
         if (trimmedName.length < 2) {
             return res.status(400).json({
-                message: "Name must contain at least 2 characters"
+                message:
+                    "Name must contain at least 2 characters"
             });
         }
 
-        // Basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(trimmedEmail)) {
             return res.status(400).json({
-                message: "Please enter a valid email address"
-            });
-        }
-
-        // Check whether another user already has this email
-        const existingUser = await User.findOne({
-            where: {
-                email: trimmedEmail
-            }
-        });
-
-        if (existingUser && String(existingUser.id) !== String(userId)) {
-            return res.status(409).json({
-                message: "This email is already being used by another account"
+                message:
+                    "Please enter a valid email address"
             });
         }
 
@@ -141,6 +116,22 @@ const updateProfile = async (req, res) => {
             });
         }
 
+        const existingUser = await User.findOne({
+            where: {
+                email: trimmedEmail
+            }
+        });
+
+        if (
+            existingUser &&
+            String(existingUser.id) !== String(userId)
+        ) {
+            return res.status(409).json({
+                message:
+                    "This email is already being used by another account"
+            });
+        }
+
         user.userName = trimmedName;
         user.email = trimmedEmail;
 
@@ -148,6 +139,7 @@ const updateProfile = async (req, res) => {
 
         return res.status(200).json({
             message: "Profile updated successfully",
+
             user: {
                 id: user.id,
                 userName: user.userName,
@@ -157,10 +149,14 @@ const updateProfile = async (req, res) => {
         });
 
     } catch (err) {
-        console.log("Update profile error:", err.message);
+        console.error(
+            "Update profile error:",
+            err.message
+        );
 
         return res.status(500).json({
-            message: "Something went wrong while updating your profile"
+            message:
+                "Something went wrong while updating your profile"
         });
     }
 };
@@ -169,27 +165,34 @@ const updateProfile = async (req, res) => {
 // ==========================================
 // PUBLIC PROFILE
 // ==========================================
+
 const getPublicProfile = async (req, res) => {
     try {
         const { id } = req.params;
 
         const user = await User.findOne({
             where: {
-                id: id
+                id
             }
         });
 
         if (!user) {
-            return res.status(404).send("User not found");
+            return res.status(404).send(
+                "User not found"
+            );
         }
 
-        const income = Number(user.totalIncome || 0);
-        const expense = Number(user.totalExpense || 0);
+        const income =
+            Number(user.totalIncome || 0);
+
+        const expense =
+            Number(user.totalExpense || 0);
 
         let savingsRate = 0;
 
         if (income > 0) {
-            savingsRate = ((income - expense) / income) * 100;
+            savingsRate =
+                ((income - expense) / income) * 100;
         }
 
         return res.render("publicProfile", {
@@ -198,7 +201,10 @@ const getPublicProfile = async (req, res) => {
         });
 
     } catch (err) {
-        console.log("Public profile error:", err.message);
+        console.error(
+            "Public profile error:",
+            err.message
+        );
 
         return res.status(500).send(
             "Something went wrong while loading the profile"
@@ -207,5 +213,9 @@ const getPublicProfile = async (req, res) => {
 };
 
 
+module.exports = {
+    getLeaderboardData,
+    updateProfile,
+    getPublicProfile
+};
 
-module.exports = { getLeaderboard, getLeaderboardData, updateProfile,getPublicProfile };

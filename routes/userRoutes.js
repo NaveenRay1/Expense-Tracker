@@ -1,27 +1,50 @@
-const express = require('express');
+
+const express = require("express");
+
 const router = express.Router();
 
-const authMiddleware = require('../middlewares/authMiddleware');
-const {isPremium} = require('../middlewares/premiumMiddleware');
+const authMiddleware = require("../middlewares/authMiddleware");
+const { isPremium } = require("../middlewares/premiumMiddleware");
 
 const {
-    getLeaderboard,
     getLeaderboardData,
     updateProfile,
     getPublicProfile
 } = require("../controllers/userController");
 
-router.get('/leaderboard', authMiddleware, isPremium, getLeaderboard);
-router.post('/leaderboard/data', authMiddleware, isPremium, getLeaderboardData);
+
+// ==========================================
+// PREMIUM LEADERBOARD
+// ==========================================
+
+router.post(
+    "/leaderboard/data",
+    authMiddleware,
+    isPremium,
+    getLeaderboardData
+);
+
+
+// ==========================================
+// UPDATE OWN PROFILE
+// ==========================================
+
 router.put(
     "/profile",
     authMiddleware,
     updateProfile
 );
 
-// Public profile
+
+// ==========================================
+// PUBLIC PROFILE
+// ==========================================
+
 router.get(
     "/profile/:id",
     getPublicProfile
 );
+
+
 module.exports = router;
+
